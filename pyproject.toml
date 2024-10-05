@@ -12,6 +12,7 @@ authors = [
   {name = "Matthias Geier", email = "Matthias.Geier@gmail.com"},
 ]
 dependencies = [
+  "tomlkit",
 ]
 requires-python = ">= 3.8"
 classifiers = [

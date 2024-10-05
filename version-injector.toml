@@ -1,0 +1,25 @@
+
+# optional, default: first entry in "versions"
+#default = "latest"
+
+# these will be injected first, in the given order
+vanguard = [
+  "latest",
+]
+
+# versions (typically Git tags) will be injected in the given order
+versions = [
+  "5.2.1",
+  "1.2.3",
+]
+
+# variants (typically Git branches) will be injected in alphabetical order
+variants = []
+
+# these will not be injected
+unlisted = [
+  "experimental-af",
+]
+
+# TODO: define default version (default: "stable"?)
+# TODO: if no versions are available: error
