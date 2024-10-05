@@ -1,5 +1,6 @@
+base-path = "pages"
 
-# optional, default: first entry in "versions"
+# if not specified, the first entry in "versions" is used
 #default = "latest"
 
 # these will be injected first, in the given order
@@ -7,19 +8,28 @@ vanguard = [
   "latest",
 ]
 
-# versions (typically Git tags) will be injected in the given order
+# versions (i.e. Git tags) will be injected in the given order
 versions = [
-  "5.2.1",
-  "1.2.3",
+  "0.1.1",
+  "0.1.0",
 ]
 
-# variants (typically Git branches) will be injected in alphabetical order
-variants = []
+# variants (i.e. Git branches) will be injected in alphabetical order
+variants = [
+]
 
-# these will not be injected
+# these will not be part of any version lists
 unlisted = [
   "experimental-af",
 ]
 
-# TODO: define default version (default: "stable"?)
-# TODO: if no versions are available: error
+vanguard-warning = "vanguard-warning.html"
+# NB: the first name in "versions" will never get a warning
+versions-warning = "versions-warning.html"
+# if no template is specified, no warnings will be injected
+#variants-warning = "???.html"
+#unlisted-warning = "???.html"
+#TODO: create example warnings for all categories
+
+# only needed if (some of) the default templates shall be overridden
+templates-path = "templates"
