@@ -1,7 +1,7 @@
 import importlib.metadata
 from pathlib import Path
 
-__version__ = importlib.metadata.version(__package__ or __name__)
+__version__ = '0.0.0'
 
 
 # TODO: get directory from command line arg or iterate all directories
