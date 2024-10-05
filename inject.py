@@ -5,7 +5,7 @@ from pathlib import Path
 for f in Path('pages/0.1.0').rglob('*.html'):
     remainder = f.read_text()
     chunks = []
-    while True:
+    while remainder:
         prefix, sep, remainder = remainder.partition(
             '<!--version-injector-injects-')
         chunks.append(prefix)
@@ -34,6 +34,6 @@ for f in Path('pages/0.1.0').rglob('*.html'):
             chunks.append('<p><b>warning!</b></p>\n')
             chunks.append('<p><b>another warning!</b></p>\n')
         else:
-            raise RuntimeError('handle this!')
+            raise RuntimeError(f'Unknown category: {category!r}')
         chunks.append(sep)
     f.write_text(''.join(chunks))
