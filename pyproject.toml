@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools >= 40.8.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "version-injector"
+version = "0.0.0"
+description = "TODO"
+readme = "README.rst"
+keywords = ["TODO", "TODO"]
+authors = [
+  {name = "Matthias Geier", email = "Matthias.Geier@gmail.com"},
+]
+dependencies = [
+]
+requires-python = ">= 3.8"
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+]
+
+[project.urls]
+Documentation = "https://mgeier.github.io/version-injector"
+Repository = "https://github.com/mgeier/version-injector"
+Issues = "https://github.com/mgeier/version-injector/issues"
