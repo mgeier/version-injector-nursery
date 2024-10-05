@@ -30,7 +30,7 @@ for f in Path('pages/0.1.0').rglob('*.html'):
         if category == 'VERSIONS':
             chunks.append('<li>generated content!</li>\n')
             chunks.append('<li>more generated content!</li>\n')
-        elif category == 'OUTDATED-WARNING':
+        elif category == 'WARNING':
             chunks.append('<p><b>warning!</b></p>\n')
             chunks.append('<p><b>another warning!</b></p>\n')
         else:
