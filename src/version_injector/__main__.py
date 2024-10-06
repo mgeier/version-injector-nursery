@@ -28,15 +28,6 @@ config = tomlkit.load(config_file.open())
 base_path = Path(config['base-path'])
 if not base_path.exists():
     raise RuntimeError(f'"base-path" not found: {base_path}')
-default = config.get('default', (config.get('versions') or [None])[0])
-if default:
-    default_path = base_path / default
-    if not default_path.exists():
-        raise RuntimeError(f'default directory not found: {default_path}')
-    # TODO: re-write the redirecting index page
-else:
-    # TODO: delete the redirecting index page
-    pass
 
 _loaders = []
 _templates_path = config.get('templates-path')
@@ -60,6 +51,17 @@ for k in CATEGORIES:
     if _filename:
         warning_templates[k] = environment.get_template(
             _filename, globals=version_names)
+
+default = config.get('default', (config.get('versions') or [None])[0])
+if default:
+    default_path = base_path / default
+    if not default_path.exists():
+        raise RuntimeError(f'default directory not found: {default_path}')
+    (base_path / 'index.html').write_text(
+        environment.get_template('index.html').render(default=default))
+else:
+    (base_path / 'index.html').unlink(missing_ok=True)
+    pass
 
 
 def render_warning(template, html_file):
