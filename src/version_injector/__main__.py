@@ -1,7 +1,9 @@
 from pathlib import Path
 
+import jinja2
 import tomlkit
 
+CATEGORIES = 'vanguard', 'versions', 'variants', 'unlisted'
 
 # TODO: possible actions:
 #       - new build has been created, dirname and category has to be given
@@ -12,9 +14,6 @@ import tomlkit
 
 # TODO: before each injection batch:
 #       - delete subdirectories that are not listed in TOML
-#       - delete temporary versions after given delay (based on git information?)
-#         "expire_in": "6 months and 4 days", "never"
-#         or after a given number is reached?
 
 # TODO: when parsing TOML:
 #       - check that all names are unique
@@ -22,10 +21,10 @@ import tomlkit
 #       - check if all the names are non-empty (truthy?)
 #       - check if all names to be listed do exist
 
-f = Path('version-injector.toml')
+config_file = Path('version-injector.toml')
 # TODO: better exception message?
 # If file doesn't exist in current directory -> exception
-config = tomlkit.load(f.open())
+config = tomlkit.load(config_file.open())
 base_path = Path(config['base-path'])
 if not base_path.exists():
     raise RuntimeError(f'"base-path" not found: {base_path}')
@@ -39,38 +38,51 @@ else:
     # TODO: delete the redirecting index page
     pass
 
+_loaders = []
+_templates_path = config.get('templates-path')
+if _templates_path:
+    if not Path(_templates_path).exists():
+        raise RuntimeError(f'"templates-path" not found: {_templates_path!r}')
+    _loaders.append(
+        jinja2.FileSystemLoader(_templates_path, followlinks=True))
+_loaders.append(jinja2.PackageLoader('version_injector', '_templates'))
+environment = jinja2.Environment(
+    loader=jinja2.ChoiceLoader(_loaders),
+    keep_trailing_newline=True,
+)
 
-def render_warning(current):
-    return '<p><b>warning!</b></p>\n'
-    if not default or current == default:
-        return ''
-    #if current in vanguard and vanguard_warning:
-    #    pass
-    #elif current in versions and versions_warning:
-    #    pass
-    #elif current in variants and variants_warning:
-    #    pass
-    #elif current in unlisted and unlisted_warning:
-    #    pass
-    #else:
-    #    # TODO: skip the following!
-    #    pass
+version_names = {}
+for k in CATEGORIES:
+    version_names[k] = config.get(k, [])
+warning_templates = {}
+for k in CATEGORIES:
+    _filename = config.get(k + '-warning')
+    if _filename:
+        warning_templates[k] = environment.get_template(
+            _filename, globals=version_names)
 
-    relative_path = base_path / default / f.relative_to(current_path)
-    while not relative_path.exists():
-        relative_path = relative_path.parent
-    replacement = {
+
+def render_warning(template, html_file):
+    new_path = base_path / default / html_file
+    while not new_path.exists():
+        new_path = new_path.parent
+    return template.render(replacement={
         'name': default,
-        'url': '/' + relative_path.relative_to(base_path).as_posix(),
-    }
-    # TODO: use template to create warning
+        'url': '/' + new_path.relative_to(base_path).as_posix(),
+    })
 
 
 def inject(current):
+    for k in CATEGORIES:
+        if current in version_names[k]:
+            warning_template = warning_templates[k]
+            break
+    else:
+        assert False
+
     current_path = base_path / current
-    versions = config.get('versions', [])
-    for f in current_path.rglob('*.html'):
-        remainder = f.read_text()
+    for html_file in current_path.rglob('*.html'):
+        remainder = html_file.read_text()
         chunks = []
         while remainder:
             prefix, sep, remainder = remainder.partition(
@@ -81,31 +93,35 @@ def inject(current):
                 assert remainder == ''
                 break
             chunks.append(sep)
-            category, sep, remainder = remainder.partition('-below-->')
+            section, sep, remainder = remainder.partition('-below-->')
             if sep == '':
                 # TODO: somehow continue?
                 raise RuntimeError(
                     'error! malformed marker? missing opening marker?')
-            chunks.append(category)
+            chunks.append(section)
             chunks.append(sep)
             discard, sep, remainder = remainder.partition(
-                f'<!--version-injector-injects-{category}-above-->')
+                f'<!--version-injector-injects-{section}-above-->')
             if sep == '':
                 raise RuntimeError(
-                    f'error/warning? no closing marker for {category!r}')
+                    f'error/warning? no closing marker for {section!r}')
             chunks.append('\n')
-            if category == 'VERSIONS':
+            if section == 'VERSIONS':
                 chunks.append('<li>generated content!</li>\n')
                 chunks.append('<li>more generated content!</li>\n')
-            elif category == 'WARNING':
-                chunks.append(render_warning(current))
+            elif section == 'WARNING':
+                if default and current != default and warning_template:
+                    warning = render_warning(
+                        warning_template, html_file.relative_to(current_path))
+                    chunks.append(warning)
             else:
-                raise RuntimeError(f'Unknown category: {category!r}')
+                raise RuntimeError(f'Unknown section: {section!r}')
             chunks.append(sep)
-        f.write_text(''.join(chunks))
+        html_file.write_text(''.join(chunks))
 
 
 # TODO: check command, potentially iterate over directories
 # TODO: if necessary, add given version to the appropriate list
-inject('0.1.0', default, base_path, config)
+
+inject('0.1.0')
 # TODO: if necessary, save TOML file (after everything was successful)
