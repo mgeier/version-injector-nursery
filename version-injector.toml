@@ -23,13 +23,12 @@ unlisted = [
   "experimental-af",
 ]
 
-#vanguard-warning = "vanguard-warning.html"
+vanguard-warning = "vanguard-warning.html"
 # NB: the first entry in "versions" will never get a warning
 versions-warning = "versions-warning.html"
 # if no template is specified, no warnings will be injected
 #variants-warning = "variants-warning.html"
 #unlisted-warning = "unlisted-warning.html"
-#TODO: create example warnings for all categories
 
 # only needed if (some of) the default templates shall be overridden
 #templates-path = "templates"
