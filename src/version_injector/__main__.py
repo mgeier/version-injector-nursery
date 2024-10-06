@@ -112,7 +112,9 @@ def inject(current):
                 chunks.append('<li>generated content!</li>\n')
                 chunks.append('<li>more generated content!</li>\n')
             elif section == 'WARNING':
-                if default and current != default and warning_template:
+                if (default and current != default and warning_template
+                        # the first entry in "versions" gets no warning
+                        and current != (config.get('versions') or [''])[0]):
                     warning = render_warning(
                         warning_template, html_file.relative_to(current_path))
                     chunks.append(warning)
