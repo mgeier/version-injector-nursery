@@ -1,0 +1,44 @@
+# TODO: don't allow parallel use?
+
+name: Build docs for branches/tags
+on: [push]
+# TODO: specify which branches?
+# TODO: also run on tags
+jobs:
+  build-and-upload-pages:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out pages storage repository
+        uses: actions/checkout@v4
+        with:
+          repository: mgeier/version-injector-nursery-pages
+          token: ${{ secrets.PERSONAL_TOKEN }}
+      - name: Check out pages storage repository
+        uses: actions/checkout@v4
+        with:
+          path: version-injector
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3
+      - name: Install Sphinx
+        run: |
+          python -m pip install sphinx
+      - name: Build with Sphinx
+        run: |
+          python -m sphinx version-injector/doc pages/${{ github.ref }}
+      - name: Install version_injector
+        run: |
+          python -m pip install git+https://github.com/mgeier/version-injector-nursery.git
+      - name: Inject versions
+        # TODO: rename "main" to "latest"
+        # TODO: set to "versions" for tags
+        if: github.ref == main
+        run: |
+          python -m version_injector latest variants
+      #- name: Inject versions
+      #  run: |
+      #    python -m version_injector ${{ github.ref }} variants
+
+      # TODO: commit and push
+      # TODO: upload to pages
