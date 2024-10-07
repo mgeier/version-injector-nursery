@@ -42,49 +42,72 @@ environment = jinja2.Environment(
     keep_trailing_newline=True,
 )
 
-version_names = {}
-for k in CATEGORIES:
-    version_names[k] = config.get(k, [])
-warning_templates = {}
-for k in CATEGORIES:
-    _filename = config.get(k + '-warning')
-    if _filename:
-        warning_templates[k] = environment.get_template(
-            _filename, globals=version_names)
+version_names = { c: config.get(c, []) for c in CATEGORIES }
+all_listed_versions = [
+    v for c in CATEGORIES if c != 'unlisted' for v in version_names[c]]
+
+warning_templates = {
+    c: environment.get_template(filename, globals=version_names)
+    for c in CATEGORIES if (filename := config.get(c + '-warning'))
+}
 
 default = config.get('default', (config.get('versions') or [None])[0])
 if default:
     default_path = base_path / default
     if not default_path.exists():
         raise RuntimeError(f'default directory not found: {default_path}')
+    if default not in all_listed_versions:
+        raise RuntimeError(f'unlisted default version: {default!r}')
     (base_path / 'index.html').write_text(
         environment.get_template('index.html').render(default=default))
 else:
     (base_path / 'index.html').unlink(missing_ok=True)
-    pass
 
 
-def render_warning(template, html_file):
-    new_path = base_path / default / html_file
-    while not new_path.exists():
-        new_path = new_path.parent
+version_list_template = environment.get_template(
+    'version-list.html', globals=version_names)
+
+
+def render_version_list(vars):
+    return version_list_template.render(vars)
+
+
+def render_warning(template, url):
     return template.render(replacement={
         'name': default,
-        'url': '/' + new_path.relative_to(base_path).as_posix(),
+        'url': url,
     })
 
 
+# this will be re-used by all inject() calls
+cache = {}
+
+
 def inject(current):
-    for k in CATEGORIES:
-        if current in version_names[k]:
-            warning_template = warning_templates[k]
+    for c in CATEGORIES:
+        if current in version_names[c]:
+            warning_template = warning_templates[c]
             break
     else:
         assert False
 
     current_path = base_path / current
-    for html_file in current_path.rglob('*.html'):
-        remainder = html_file.read_text()
+    for html_path in current_path.rglob('*.html'):
+        relative_html_path = html_path.relative_to(current_path)
+        relative_html_url = relative_html_path.as_posix()
+        links = cache.setdefault(relative_html_url, {})
+        for v in all_listed_versions:
+            if v not in links:
+                if v == current:
+                    # we know that this file exists
+                    links[v] = f'/{v}/{relative_html_url}'
+                    continue
+                new_path = base_path / v / relative_html_path
+                while not new_path.exists():
+                    new_path = new_path.parent
+                links[v] = '/' + new_path.relative_to(base_path).as_posix()
+
+        remainder = html_path.read_text()
         chunks = []
         while remainder:
             prefix, sep, remainder = remainder.partition(
@@ -109,19 +132,20 @@ def inject(current):
                     f'error/warning? no closing marker for {section!r}')
             chunks.append('\n')
             if section == 'VERSIONS':
-                chunks.append('<li>generated content!</li>\n')
-                chunks.append('<li>more generated content!</li>\n')
+                chunks.append(render_version_list({
+                    'links': links,
+                    'current': current,
+                }))
             elif section == 'WARNING':
                 if (default and current != default and warning_template
                         # the first entry in "versions" gets no warning
                         and current != (config.get('versions') or [''])[0]):
-                    warning = render_warning(
-                        warning_template, html_file.relative_to(current_path))
+                    warning = render_warning(warning_template, links[default])
                     chunks.append(warning)
             else:
                 raise RuntimeError(f'Unknown section: {section!r}')
             chunks.append(sep)
-        html_file.write_text(''.join(chunks))
+        html_path.write_text(''.join(chunks))
 
 
 # TODO: check command, potentially iterate over directories
