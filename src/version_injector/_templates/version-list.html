@@ -4,6 +4,6 @@
 {%- for v in versions %}
 <li><a class="reference internal{% if v == current %} current-page{% endif %}" href="{{ links[v] }}">{{ v }}</a></li>
 {%- endfor %}
-{%- for v in variants %}
+{%- for v in variants|sort %}
 <li><a class="reference internal{% if v == current %} current-page{% endif %}" href="{{ links[v] }}">{{ v }}</a></li>
 {%- endfor %}
