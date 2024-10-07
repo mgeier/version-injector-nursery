@@ -5,13 +5,13 @@ base-path = "pages"
 
 # these will be injected first, in the given order
 vanguard = [
-  "latest",
+    "latest",
 ]
 
 # versions (i.e. Git tags) will be injected in the given order
 versions = [
-  "0.1.1",
-  "0.1.0",
+    "0.1.1",
+    "0.1.0",
 ]
 
 # variants (i.e. Git branches) will be injected in alphabetical order
@@ -20,7 +20,7 @@ variants = [
 
 # these will not be part of any version lists
 unlisted = [
-  "experimental-af",
+    "experimental-af",
 ]
 
 vanguard-warning = "vanguard-warning.html"

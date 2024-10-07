@@ -1,33 +1,56 @@
+"""Inject version information into HTML files."""
+import argparse
 from pathlib import Path
 
 import jinja2
-import tomlkit
+from tomlkit.toml_file import TOMLFile
 
 CATEGORIES = 'vanguard', 'versions', 'variants', 'unlisted'
 
-# TODO: possible actions:
-#       - new build has been created, dirname and category has to be given
-#         - if already in TOML: inject versions only into the new build
-#           (the given category is ignored)
-#         - if not yet in TOML: add version/variant, inject versions everywhere
-#       - manual trigger, inject versions everywhere
+parser = argparse.ArgumentParser(
+    prog='python -m version_injector',
+    description=__doc__,
+    formatter_class=argparse.RawDescriptionHelpFormatter)
+parser.add_argument(
+    'version', nargs='?', metavar='VERSION',
+    type=str,
+    help='name of version that has been added/updated')
+parser.add_argument(
+    'category', nargs='?', choices=CATEGORIES,
+    help="if version doesn't exist yet, it will be added to this category")
+args = parser.parse_args()
 
-# TODO: before each injection batch:
-#       - delete subdirectories that are not listed in TOML
+config_file = TOMLFile('version-injector.toml')
+# TODO: better exception message?
+# If file doesn't exist in current directory -> exception
+config = config_file.read()
+base_path = Path(config['base-path'])
+if not base_path.exists():
+    raise RuntimeError(f'"base-path" not found: {base_path}')
 
 # TODO: when parsing TOML:
-#       - check that all names are unique
 #       - if no versions are available: error
 #       - check if all the names are non-empty (truthy?)
 #       - check if all names to be listed do exist
 
-config_file = Path('version-injector.toml')
-# TODO: better exception message?
-# If file doesn't exist in current directory -> exception
-config = tomlkit.load(config_file.open())
-base_path = Path(config['base-path'])
-if not base_path.exists():
-    raise RuntimeError(f'"base-path" not found: {base_path}')
+all_versions = [v for c in CATEGORIES for v in config.get(c, [])]
+if len(all_versions) != len(set(all_versions)):
+    # TODO: show which are duplicates
+    parser.error(f'duplicate version names')
+if args.version:
+    if not args.category:
+        parser.error('either 0 or 2 arguments are required')
+    if args.version not in all_versions:
+        names = config.setdefault(args.category, [])
+        if not (base_path / args.version).is_dir():
+            parser.exit(f'directory not found: {args.version!r}')
+        names.insert(0, args.version)
+        config_file.write(config)
+        # re-compute because a version has been added:
+        all_versions = [v for c in CATEGORIES for v in config.get(c, [])]
+else:
+    # TODO: delete subdirectories that are not in all_versions
+    pass
 
 _loaders = []
 _templates_path = config.get('templates-path')
@@ -84,9 +107,11 @@ cache = {}
 
 
 def inject(current):
+    # TODO: proper logging
+    print('injecting into', current)
     for c in CATEGORIES:
         if current in version_names[c]:
-            warning_template = warning_templates[c]
+            warning_template = warning_templates.get(c)
             break
     else:
         assert False
@@ -148,8 +173,5 @@ def inject(current):
         html_path.write_text(''.join(chunks))
 
 
-# TODO: check command, potentially iterate over directories
-# TODO: if necessary, add given version to the appropriate list
-
-inject('0.1.0')
-# TODO: if necessary, save TOML file (after everything was successful)
+for v in all_versions:
+    inject(v)
