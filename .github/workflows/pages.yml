@@ -33,7 +33,7 @@ jobs:
       - name: Inject versions
         # TODO: rename "main" to "latest"
         # TODO: set to "versions" for tags
-        if: github.ref == main
+        if: github.ref_name == github.event.repository.default_branch
         run: |
           python -m version_injector latest variants
       #- name: Inject versions
