@@ -1,2 +1,6 @@
 Version Injector
 ================
+
+.. toctree::
+
+    motivation
