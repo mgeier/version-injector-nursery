@@ -21,10 +21,6 @@ jobs:
         with:
           repository: mgeier/version-injector-nursery-pages
           token: ${{ secrets.PERSONAL_TOKEN }}
-      - name: Set Git user/email
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
       - name: Check out pages storage repository
         uses: actions/checkout@v4
         with:
@@ -51,6 +47,10 @@ jobs:
         # TODO: set to "versions" for tags
         run: |
           python -m version_injector $VERSION variants
+      - name: Set Git user/email
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
       - name: Commit modified files
         run: |
           # This changes when $VERSION is created for the first time:
