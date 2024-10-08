@@ -70,7 +70,12 @@ jobs:
         run: |
           if ! git push
           then
-            echo "Did another job run in parallel? Please re-run this job!"
+            echo
+            echo "On second thought ... maybe you can ignore the above error ..."
+            echo
+            echo "Did another job run in parallel?"
+            echo "If yes, please try re-running this job!"
+            echo
             false
           fi
       # Don't forget to activate "pages" in your project settings!
