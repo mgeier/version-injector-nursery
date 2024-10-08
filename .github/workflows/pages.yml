@@ -16,6 +16,10 @@ jobs:
         with:
           repository: mgeier/version-injector-nursery-pages
           token: ${{ secrets.PERSONAL_TOKEN }}
+      - name: Set Git user/email
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
       - name: Check out pages storage repository
         uses: actions/checkout@v4
         with:
@@ -24,12 +28,19 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: 3
+      - name: Remove target directory
+        run: |
+          rm -rf pages/$VERSION
       - name: Install Sphinx et al.
         run: |
           python -m pip install sphinx insipid-sphinx-theme
       - name: Build with Sphinx
         run: |
           python -m sphinx version-injector/doc pages/$VERSION
+      - name: Commit created files
+        run: |
+          git add pages/$VERSION
+          git diff --cached --quiet || git commit -m "New files for $VERSION"
       - name: Install version_injector
         run: |
           python -m pip install git+https://github.com/mgeier/version-injector-nursery.git
@@ -37,6 +48,13 @@ jobs:
         # TODO: set to "versions" for tags
         run: |
           python -m version_injector $VERSION variants
-
-      # TODO: commit and push
+      - name: Commit modified files
+        run: |
+          git add pages
+          # This changes when $VERSION is created for the first time:
+          git add version-injector.toml
+          git diff --cached --quiet || git commit -m "Modified files for $VERSION"
+      - name: Push commits
+        run: |
+          git push
       # TODO: upload to pages
