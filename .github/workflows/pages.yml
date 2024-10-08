@@ -7,13 +7,27 @@ on:
   # TODO: also run on tags
   # TODO: allow manual triggering:
   #workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 env:
   # NB: We want to use "latest" for the main branch.
   VERSION: ${{ github.ref_name == github.event.repository.default_branch && 'latest' || github.ref_name }}
 jobs:
   build-and-upload-pages:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
+      # The "concurrency" setting doesn't work for us, see
+      # https://github.com/orgs/community/discussions/5435
+      # https://github.com/orgs/community/discussions/12835
+      # https://github.com/orgs/community/discussions/41518
+      # https://github.com/orgs/community/discussions/63136
+      - name: Make sure we don't run in parallel
+        uses: softprops/turnstyle@v2
       - name: Check out pages storage repository
         uses: actions/checkout@v4
         with:
@@ -61,4 +75,13 @@ jobs:
       - name: Push commits
         run: |
           git push
-      # TODO: upload to pages
+      # Don't forget to activate "pages" in your project settings!
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'pages'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
