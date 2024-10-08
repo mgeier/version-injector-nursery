@@ -39,10 +39,6 @@ jobs:
           python -m sphinx version-injector/doc pages/$VERSION --doctree-dir $RUNNER_TEMP --write-all
           # We don't need this:
           rm pages/$VERSION/.buildinfo
-      - name: Commit created files
-        run: |
-          git add pages/$VERSION
-          git diff --cached --quiet || git commit -m "New files for $VERSION"
       - name: Install version_injector
         run: |
           python -m pip install git+https://github.com/mgeier/version-injector-nursery.git
@@ -52,10 +48,12 @@ jobs:
           python -m version_injector $VERSION variants
       - name: Commit modified files
         run: |
+          git add pages/$VERSION
+          git diff --cached --quiet || git commit -m "New/updated files for $VERSION"
           git add pages
           # This changes when $VERSION is created for the first time:
           git add version-injector.toml
-          git diff --cached --quiet || git commit -m "Modified files for $VERSION"
+          git diff --cached --quiet || git commit -m "Modified files after $VERSION changes"
       - name: Push commits
         run: |
           git push
