@@ -16,9 +16,6 @@ env:
   VERSION: ${{ github.ref_name == github.event.repository.default_branch && 'latest' || github.ref_name }}
 jobs:
   build-and-upload-pages:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       # The "concurrency" setting doesn't work for us, see
