@@ -4,6 +4,9 @@ name: Build docs for branches/tags
 on: [push]
 # TODO: specify which branches?
 # TODO: also run on tags
+env:
+  # NB: We want to use "latest" for the main branch.
+  VERSION: ${{ github.ref_name == github.event.repository.default_branch && 'latest' || github.ref_name }}
 jobs:
   build-and-upload-pages:
     runs-on: ubuntu-latest
@@ -26,19 +29,14 @@ jobs:
           python -m pip install sphinx insipid-sphinx-theme
       - name: Build with Sphinx
         run: |
-          python -m sphinx version-injector/doc pages/${{ github.ref }}
+          python -m sphinx version-injector/doc pages/$VERSION
       - name: Install version_injector
         run: |
           python -m pip install git+https://github.com/mgeier/version-injector-nursery.git
       - name: Inject versions
-        # TODO: rename "main" to "latest"
         # TODO: set to "versions" for tags
-        if: github.ref_name == github.event.repository.default_branch
         run: |
-          python -m version_injector latest variants
-      #- name: Inject versions
-      #  run: |
-      #    python -m version_injector ${{ github.ref }} variants
+          python -m version_injector $VERSION variants
 
       # TODO: commit and push
       # TODO: upload to pages
