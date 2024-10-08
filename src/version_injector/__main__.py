@@ -54,6 +54,7 @@ else:
 
 _loaders = []
 _templates_path = config.get('templates-path')
+# TODO: make sure it's relative to the TOML location
 if _templates_path:
     if not Path(_templates_path).exists():
         raise RuntimeError(f'"templates-path" not found: {_templates_path!r}')
