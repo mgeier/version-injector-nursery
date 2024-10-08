@@ -1,5 +1,3 @@
-# TODO: don't allow parallel use?
-
 name: Build docs for branches/tags
 on:
   push:
@@ -18,13 +16,6 @@ jobs:
   build-and-upload-pages:
     runs-on: ubuntu-latest
     steps:
-      # The "concurrency" setting doesn't work for us, see
-      # https://github.com/orgs/community/discussions/5435
-      # https://github.com/orgs/community/discussions/12835
-      # https://github.com/orgs/community/discussions/41518
-      # https://github.com/orgs/community/discussions/63136
-      - name: Make sure we don't run in parallel
-        uses: softprops/turnstyle@v2
       - name: Check out pages storage repository
         uses: actions/checkout@v4
         with:
@@ -70,8 +61,14 @@ jobs:
           git add pages
           git diff --cached --quiet || git commit -m "Modified files after $VERSION changes"
       - name: Push commits
+        # The "concurrency" setting doesn't work for us, see
+        # https://github.com/orgs/community/discussions/5435
+        # https://github.com/orgs/community/discussions/12835
+        # https://github.com/orgs/community/discussions/41518
+        # https://github.com/orgs/community/discussions/63136
+        # The best thing we can do for now, is to give a helpful error message:
         run: |
-          git push
+          git push || echo "Did another job run in parallel? Please re-run this job!" && false
       # Don't forget to activate "pages" in your project settings!
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
