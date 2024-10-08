@@ -68,7 +68,11 @@ jobs:
         # https://github.com/orgs/community/discussions/63136
         # The best thing we can do for now, is to give a helpful error message:
         run: |
-          git push || (echo "Did another job run in parallel? Please re-run this job!" && false)
+          if ! git push
+          then
+            echo "Did another job run in parallel? Please re-run this job!"
+            false
+          fi
       # Don't forget to activate "pages" in your project settings!
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
