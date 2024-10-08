@@ -76,8 +76,6 @@ jobs:
         run: |
           git push
       # Don't forget to activate "pages" in your project settings!
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
