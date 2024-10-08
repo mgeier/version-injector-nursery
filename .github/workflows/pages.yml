@@ -55,11 +55,11 @@ jobs:
         run: |
           # This changes when $VERSION is created for the first time:
           git add version-injector.toml
-          git diff --cached --quiet || git commit -m "Changed configuration file for $VERSION"
+          git diff --cached --quiet || git commit -m "Changed configuration file for '$VERSION'"
           git add pages/$VERSION
-          git diff --cached --quiet || git commit -m "New/updated files for $VERSION"
+          git diff --cached --quiet || git commit -m "New/updated files for '$VERSION'"
           git add pages
-          git diff --cached --quiet || git commit -m "Modified files after $VERSION changes"
+          git diff --cached --quiet || git commit -m "Modified files after '$VERSION' changes"
       - name: Push commits
         # The "concurrency" setting doesn't work for us, see
         # https://github.com/orgs/community/discussions/5435
