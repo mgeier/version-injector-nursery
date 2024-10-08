@@ -37,6 +37,8 @@ jobs:
       - name: Build with Sphinx
         run: |
           python -m sphinx version-injector/doc pages/$VERSION --doctree-dir $RUNNER_TEMP
+          # We don't need this:
+          rm pages/$VERSION/.buildinfo
       - name: Commit created files
         run: |
           git add pages/$VERSION
