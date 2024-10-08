@@ -36,7 +36,7 @@ jobs:
           python -m pip install sphinx insipid-sphinx-theme
       - name: Build with Sphinx
         run: |
-          python -m sphinx version-injector/doc pages/$VERSION --doctree-dir $RUNNER_TEMP
+          python -m sphinx version-injector/doc pages/$VERSION --doctree-dir $RUNNER_TEMP --write-all
           # We don't need this:
           rm pages/$VERSION/.buildinfo
       - name: Commit created files
