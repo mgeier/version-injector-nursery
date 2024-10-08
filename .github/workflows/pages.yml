@@ -48,11 +48,12 @@ jobs:
           python -m version_injector $VERSION variants
       - name: Commit modified files
         run: |
+          # This changes when $VERSION is created for the first time:
+          git add version-injector.toml
+          git diff --cached --quiet || git commit -m "Changed configuration file for $VERSION"
           git add pages/$VERSION
           git diff --cached --quiet || git commit -m "New/updated files for $VERSION"
           git add pages
-          # This changes when $VERSION is created for the first time:
-          git add version-injector.toml
           git diff --cached --quiet || git commit -m "Modified files after $VERSION changes"
       - name: Push commits
         run: |
