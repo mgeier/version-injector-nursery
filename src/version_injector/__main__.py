@@ -124,14 +124,15 @@ def inject(current):
         links = cache.setdefault(relative_html_url, {})
         for v in all_listed_versions:
             if v not in links:
+                up = '../' * len(Path(relative_html_path).parts)
                 if v == current:
                     # we know that this file exists
-                    links[v] = f'/{v}/{relative_html_url}'
+                    links[v] = f'{up}{v}/{relative_html_url}'
                     continue
                 new_path = base_path / v / relative_html_path
                 while not new_path.exists():
                     new_path = new_path.parent
-                links[v] = '/' + new_path.relative_to(base_path).as_posix()
+                links[v] = up + new_path.relative_to(base_path).as_posix()
 
         remainder = html_path.read_text()
         chunks = []
