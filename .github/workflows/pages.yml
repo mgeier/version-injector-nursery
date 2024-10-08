@@ -1,9 +1,12 @@
 # TODO: don't allow parallel use?
 
 name: Build docs for branches/tags
-on: [push]
-# TODO: specify which branches?
-# TODO: also run on tags
+on:
+  push:
+  # TODO: specify which branches?
+  # TODO: also run on tags
+  # TODO: allow manual triggering:
+  #workflow_dispatch:
 env:
   # NB: We want to use "latest" for the main branch.
   VERSION: ${{ github.ref_name == github.event.repository.default_branch && 'latest' || github.ref_name }}
