@@ -3,8 +3,7 @@ on:
   push:
   # TODO: specify which branches?
   # TODO: also run on tags
-  # TODO: allow manual triggering:
-  #workflow_dispatch:
+  workflow_dispatch:
 permissions:
   contents: read
   pages: write
