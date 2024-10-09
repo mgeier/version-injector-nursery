@@ -2,7 +2,8 @@ base-path = "pages"
 # default: empty string
 #base-url = "/my-project"
 
-# if not specified, the first entry in "versions" is used
+# if not specified, the first available entry in
+# ["versions", "vanguard", "variants"] is used
 #default = "latest"
 
 # these will be injected first, in the given order

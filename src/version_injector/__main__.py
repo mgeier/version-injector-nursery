@@ -76,7 +76,10 @@ warning_templates = {
     for c in CATEGORIES if (filename := config.get(c + '-warning'))
 }
 
-default = config.get('default', (config.get('versions') or [None])[0])
+default = config.get('default', (
+    config.get('versions') or
+    config.get('vanguard') or
+    config.get('variants') or [None])[0])
 if default:
     default_path = base_path / default
     if not default_path.exists():
