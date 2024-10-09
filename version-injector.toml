@@ -1,4 +1,6 @@
 base-path = "pages"
+# default: empty string
+#base-url = "/my-project"
 
 # if not specified, the first entry in "versions" is used
 #default = "latest"

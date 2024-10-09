@@ -27,6 +27,7 @@ config = config_file.read()
 base_path = Path(config['base-path'])
 if not base_path.exists():
     raise RuntimeError(f'"base-path" not found: {base_path}')
+base_url = config.get('base-url', '')
 
 # TODO: when parsing TOML:
 #       - if no versions are available: error
@@ -36,7 +37,7 @@ if not base_path.exists():
 all_versions = [v for c in CATEGORIES for v in config.get(c, [])]
 if len(all_versions) != len(set(all_versions)):
     # TODO: show which are duplicates
-    parser.error(f'duplicate version names')
+    parser.exit(f'duplicate version names')
 if args.version:
     if not args.category:
         parser.error('either 0 or 2 arguments are required')
@@ -83,7 +84,8 @@ if default:
     if default not in all_listed_versions:
         raise RuntimeError(f'unlisted default version: {default!r}')
     (base_path / 'index.html').write_text(
-        environment.get_template('index.html').render(default=default))
+        environment.get_template('index.html').render(
+            default=default, base_url=base_url))
 else:
     (base_path / 'index.html').unlink(missing_ok=True)
 
@@ -124,15 +126,15 @@ def inject(current):
         links = cache.setdefault(relative_html_url, {})
         for v in all_listed_versions:
             if v not in links:
-                up = '../' * len(Path(relative_html_path).parts)
                 if v == current:
                     # we know that this file exists
-                    links[v] = f'{up}{v}/{relative_html_url}'
+                    links[v] = f'{base_url}/{v}/{relative_html_url}'
                     continue
                 new_path = base_path / v / relative_html_path
                 while not new_path.exists():
                     new_path = new_path.parent
-                links[v] = up + new_path.relative_to(base_path).as_posix()
+                links[v] = '/'.join([
+                    base_url, new_path.relative_to(base_path).as_posix()])
 
         remainder = html_path.read_text()
         chunks = []

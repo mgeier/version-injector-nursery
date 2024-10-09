@@ -1,3 +1,4 @@
+{# TODO: use v.name and v.links (for future extensibility? e.g. v.) #}
 {%- for v in vanguard %}
 <li><a class="reference internal{% if v == current %} current-page{% endif %}" href="{{ links[v] }}">{{ v }}</a></li>
 {%- endfor %}
