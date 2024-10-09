@@ -5,6 +5,8 @@ from pathlib import Path
 import jinja2
 from tomlkit.toml_file import TOMLFile
 
+from version_injector import inject_files
+
 CATEGORIES = 'vanguard', 'versions', 'variants', 'unlisted'
 
 parser = argparse.ArgumentParser(
@@ -122,9 +124,7 @@ def inject(current):
     else:
         assert False
 
-    current_path = base_path / current
-    for html_path in current_path.rglob('*.html'):
-        relative_html_path = html_path.relative_to(current_path)
+    def prepare_injection(relative_html_path):
         relative_html_url = relative_html_path.as_posix()
         links = cache.setdefault(relative_html_url, {})
         for v in all_listed_versions:
@@ -139,45 +139,25 @@ def inject(current):
                 links[v] = '/'.join([
                     base_url, new_path.relative_to(base_path).as_posix()])
 
-        remainder = html_path.read_text()
-        chunks = []
-        while remainder:
-            prefix, sep, remainder = remainder.partition(
-                '<!--version-injector-injects-')
-            chunks.append(prefix)
-            if sep == '':
-                # no more markers found
-                assert remainder == ''
-                break
-            chunks.append(sep)
-            section, sep, remainder = remainder.partition('-below-->')
-            if sep == '':
-                # TODO: somehow continue?
-                raise RuntimeError(
-                    'error! malformed marker? missing opening marker?')
-            chunks.append(section)
-            chunks.append(sep)
-            discard, sep, remainder = remainder.partition(
-                f'<!--version-injector-injects-{section}-above-->')
-            if sep == '':
-                raise RuntimeError(
-                    f'error/warning? no closing marker for {section!r}')
-            chunks.append('\n')
+        def injection(section):
             if section == 'VERSIONS':
-                chunks.append(render_version_list({
+                return render_version_list({
                     'links': links,
                     'current': current,
-                }))
+                })
             elif section == 'WARNING':
                 if (default and current != default and warning_template
                         # the first entry in "versions" gets no warning
                         and current != (config.get('versions') or [''])[0]):
-                    warning = render_warning(warning_template, links[default])
-                    chunks.append(warning)
-            else:
-                raise RuntimeError(f'Unknown section: {section!r}')
-            chunks.append(sep)
-        html_path.write_text(''.join(chunks))
+                    return render_warning(warning_template, links[default])
+            return ''
+
+        return injection
+
+    try:
+        inject_files(base_path / current, prepare_injection)
+    except Exception as e:
+        parser.exit(type(e).__name__ + ': '  + str(e))
 
 
 for v in all_versions:
