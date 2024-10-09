@@ -99,17 +99,6 @@ version_list_template = environment.get_template(
     'version-list.html', globals=version_names)
 
 
-def render_version_list(vars):
-    return version_list_template.render(vars)
-
-
-def render_warning(template, url):
-    return template.render(replacement={
-        'name': default,
-        'url': url,
-    })
-
-
 # this will be re-used by all inject() calls
 cache = {}
 
@@ -141,7 +130,7 @@ def inject(current):
 
         def injection(section):
             if section == 'VERSIONS':
-                return render_version_list({
+                return version_list_template.render({
                     'links': links,
                     'current': current,
                 })
@@ -149,15 +138,18 @@ def inject(current):
                 if (default and current != default and warning_template
                         # the first entry in "versions" gets no warning
                         and current != (config.get('versions') or [''])[0]):
-                    return render_warning(warning_template, links[default])
+                    return warning_template.render(replacement={
+                        'name': default,
+                        'url': links[default],
+                    })
             return ''
 
         return injection
 
     try:
         inject_files(base_path / current, prepare_injection)
-    except Exception as e:
-        parser.exit(type(e).__name__ + ': '  + str(e))
+    except RuntimeError as e:
+        parser.exit(str(e))
 
 
 for v in all_versions:
