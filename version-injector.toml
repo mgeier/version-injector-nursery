@@ -35,3 +35,5 @@ versions-warning = "versions-warning.html"
 
 # only needed if (some of) the default templates shall be overridden
 #templates-path = "templates"
+# TODO: rename to template-path?
+#template-path = "templates"
