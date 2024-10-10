@@ -103,51 +103,49 @@ version_list_template = environment.get_template(
 cache = {}
 
 
-def inject(current):
-    # TODO: proper logging
-    print('injecting into', current)
+def prepare_injection(current, relative_html_path):
+    relative_html_url = relative_html_path.as_posix()
+    links = cache.setdefault(relative_html_url, {})
     for c in CATEGORIES:
         if current in version_names[c]:
             warning_template = warning_templates.get(c)
             break
     else:
         assert False
+    for v in all_listed_versions:
+        if v not in links:
+            if v == current:
+                # we know that this file exists
+                links[v] = f'{base_url}/{v}/{relative_html_url}'
+                continue
+            new_path = base_path / v / relative_html_path
+            while not new_path.exists():
+                new_path = new_path.parent
+            links[v] = '/'.join([
+                base_url, new_path.relative_to(base_path).as_posix()])
 
-    def prepare_injection(relative_html_path):
-        relative_html_url = relative_html_path.as_posix()
-        links = cache.setdefault(relative_html_url, {})
-        for v in all_listed_versions:
-            if v not in links:
-                if v == current:
-                    # we know that this file exists
-                    links[v] = f'{base_url}/{v}/{relative_html_url}'
-                    continue
-                new_path = base_path / v / relative_html_path
-                while not new_path.exists():
-                    new_path = new_path.parent
-                links[v] = '/'.join([
-                    base_url, new_path.relative_to(base_path).as_posix()])
-
-        def injection(section):
-            if section == 'VERSIONS':
-                return version_list_template.render({
-                    'links': links,
-                    'current': current,
+    def injection(section):
+        if section == 'VERSIONS':
+            return version_list_template.render({
+                'links': links,
+                'current': current,
+            })
+        elif section == 'WARNING':
+            if (default and current != default and warning_template
+                    # the first entry in "versions" gets no warning
+                    and current != (config.get('versions') or [''])[0]):
+                return warning_template.render(replacement={
+                    'name': default,
+                    'url': links[default],
                 })
-            elif section == 'WARNING':
-                if (default and current != default and warning_template
-                        # the first entry in "versions" gets no warning
-                        and current != (config.get('versions') or [''])[0]):
-                    return warning_template.render(replacement={
-                        'name': default,
-                        'url': links[default],
-                    })
-            return ''
+        return ''
 
-        return injection
+    return injection
 
+
+def inject(current):
     try:
-        inject_files(base_path / current, prepare_injection)
+        inject_files(base_path, current, prepare_injection)
     except RuntimeError as e:
         parser.exit(str(e))
 
