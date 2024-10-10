@@ -22,6 +22,8 @@ parser.add_argument(
     help="if version doesn't exist yet, it will be added to this category")
 args = parser.parse_args()
 
+# TODO: no argument: inject all versions
+
 config_file = TOMLFile('version-injector.toml')
 # TODO: better exception message?
 # If file doesn't exist in current directory -> exception
