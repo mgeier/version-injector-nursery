@@ -41,7 +41,7 @@ jobs:
         with:
           path: main-repo
       - name: Build docs
-        uses: ./.github/workflows/build-docs.yml
+        uses: ./.github/workflows/build-docs
         with:
           repo-path: main-repo
           output-path: pages/$VERSION
