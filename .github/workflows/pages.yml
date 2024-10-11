@@ -22,15 +22,16 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Setup Github Pages
-        id: configure-pages
-        uses: actions/configure-pages@v5
+      # TODO: check if running on fork? only build docs in this case.
       - name: Check out pages storage repository
         uses: actions/checkout@v4
         with:
           repository: ${{ env.PAGES_STORAGE_REPO }}
           # TODO: rename to something more specific, e.g. PAGES_STORAGE_TOKEN?
           token: ${{ secrets.PERSONAL_TOKEN }}
+      - name: Setup Github Pages
+        id: configure-pages
+        uses: actions/configure-pages@v5
       - name: Remove target directory
         run: |
           rm -rf pages/$VERSION
