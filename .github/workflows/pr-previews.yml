@@ -9,10 +9,25 @@ on:
 env:
   VERSION: ${{ github.event.number }}
 jobs:
-  build-and-deploy-preview:
+  build:
+    uses: ./.github/workflows/build-docs.yml
+
+  deploy-preview:
     runs-on: ubuntu-latest
     steps:
-      # TODO: build docs
+      # TODO: checkout storage/pages repo
+
+      - name: Remove target directory
+        run: |
+          rm -rf pages/$VERSION
+      - uses: actions/download-artifact@v4
+        with:
+          name: docs
+          path: pages/${{ env.VERSION }}
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3
       - name: Install version_injector
         # TODO: "normal" users should install the release from PyPI:
         run: |
@@ -20,6 +35,7 @@ jobs:
       - name: Inject PR warnings
         # TODO: implement this!
         run: |
-          python -m version_injector.generic_warning $VERSION
+          #python -m version_injector.generic_warning $VERSION
       # TODO: commmit
       # TODO: push
+      # TODO: create/update PR comment
