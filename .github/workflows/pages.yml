@@ -10,6 +10,7 @@ on:
     # TODO: only allow on default branch?
     # TODO: don't build docs, only inject all existing docs
 env:
+  # TODO: use project variable for this?
   PAGES_STORAGE_REPO: mgeier/version-injector-nursery-pages
   # Here you can map branch/tag names to displayed version names.
   # We want to use "latest" for the main branch:
@@ -23,6 +24,7 @@ jobs:
     needs: build
     steps:
       # TODO: check if running on fork? only build docs in this case.
+      # TODO: maybe check if token/repo is defined and give a nice error message?
       - name: Check out pages storage repository
         uses: actions/checkout@v4
         with:
