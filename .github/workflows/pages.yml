@@ -21,13 +21,13 @@ env:
   # We want to use "latest" for the main branch:
   VERSION: ${{ github.ref_name == github.event.repository.default_branch && 'latest' || github.ref_name }}
 jobs:
-  build-docs:
+  build:
     uses: ./.github/workflows/build-docs.yml
     #secrets: inherit
 
   assemble-pages:
     runs-on: ubuntu-latest
-    needs: build-docs
+    needs: build
     steps:
       - name: Setup Github Pages
         id: configure-pages
@@ -47,7 +47,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: docs
-          path: pages/$VERSION
+          path: pages/${{ env.VERSION }}
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install version_injector
