@@ -1,0 +1,25 @@
+name: Build pull request preview
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+env:
+  VERSION: ${{ github.event.number }}
+jobs:
+  build-and-deploy-preview:
+    runs-on: ubuntu-latest
+    steps:
+      # TODO: build docs
+      - name: Install version_injector
+        # TODO: "normal" users should install the release from PyPI:
+        run: |
+          python -m pip install git+https://github.com/mgeier/version-injector-nursery.git
+      - name: Inject PR warnings
+        # TODO: implement this!
+        run: |
+          python -m version_injector.generic_warning $VERSION
+      # TODO: commmit
+      # TODO: push

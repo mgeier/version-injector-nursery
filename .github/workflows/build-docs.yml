@@ -1,0 +1,28 @@
+# This is where you specify how your docs are built.
+name: Build docs
+inputs:
+  repo-path:
+  output-path:
+#outputs:
+#  # TODO: maybe use this for generated PDF file paths or something?
+#  # TODO: allow multiple downloads?
+#  download-path:
+#    value: ???
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3
+    - name: Install Sphinx et al.
+      run: |
+        python -m pip install sphinx insipid-sphinx-theme
+    - name: Build with Sphinx
+      env:
+        REPO: ${{ inputs.repo-path }}
+        OUT: ${{ inputs.output-path }}
+      run: |
+        python -m sphinx $REPO/doc $OUT --doctree-dir $RUNNER_TEMP --fresh-env --write-all
+        # We don't need this:
+        rm $OUT/.buildinfo
