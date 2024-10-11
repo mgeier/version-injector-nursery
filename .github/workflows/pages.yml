@@ -50,6 +50,9 @@ jobs:
           path: pages/${{ env.VERSION }}
           #run-id: ${{ github.event.workflow_run.id }}
           #github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: "TEMP: check directory contents"
+        run: |
+          ls pages/$VERSION
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
