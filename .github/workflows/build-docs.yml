@@ -1,0 +1,35 @@
+# This is where you specify how your docs are built.
+name: Build docs
+on:
+  workflow_call:
+#outputs:
+#  # TODO: maybe use this for generated PDF file paths or something?
+#  # TODO: allow multiple downloads?
+#  download-path:
+#    value: ???
+env:
+  PIP: python -m pip
+  SPHINX: python -m sphinx --color
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3
+      - name: Install Sphinx et al.
+        # TODO: use requirements.txt?
+        run: |
+          $PIP install sphinx insipid-sphinx-theme
+      - name: Build with Sphinx
+        run: |
+          $SPHINX doc _build/html --doctree-dir _build/doctrees -b html
+      # TODO: build PDF? move it to the HTML directory?
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docs
+          path: _build/html
+          include-hidden-files: false
