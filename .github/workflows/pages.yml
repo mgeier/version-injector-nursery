@@ -30,7 +30,7 @@ jobs:
       - name: Check out pages storage repository
         uses: actions/checkout@v4
         with:
-          repository: $PAGES_STORAGE_REPO
+          repository: ${{ env.PAGES_STORAGE_REPO }}
           # TODO: rename to something more specific, e.g. PAGES_STORAGE_TOKEN?
           token: ${{ secrets.PERSONAL_TOKEN }}
       - name: Remove target directory
