@@ -48,6 +48,10 @@ jobs:
         # TODO: implement this!
         run: |
           #python -m version_injector.generic_warning $VERSION
+      - name: TEMPORARY! create dummy file
+        run: |
+          mkdir -p pages/$VERSION
+          echo "dummy content" > pages/$VERSION/index.html
       - name: Set Git user/email
         run: |
           git config --global user.name 'github-actions[bot]'
