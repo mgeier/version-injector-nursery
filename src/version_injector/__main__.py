@@ -94,8 +94,12 @@ if default:
         environment.get_template('index.html').render(
             default=default, base_url=base_url))
 else:
+    # TODO: create index page with all_listed_versions (if empty: ?)
     (base_path / 'index.html').unlink(missing_ok=True)
 
+(base_path / '404.html').write_text(
+    environment.get_template('404.html').render(
+        default=default, base_url=base_url))
 
 version_list_template = environment.get_template(
     'version-list.html', globals=version_names)
