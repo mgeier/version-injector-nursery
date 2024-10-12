@@ -5,10 +5,12 @@
     window.onload = () => {
       document.getElementById("requested").innerHTML = window.location.href;
       let pathname = window.location.pathname;
+{%- if base_url %}
       if (!pathname.startsWith("{{ base_url }}/")) {
         throw new Error("This 404 page should only be used within '{{ base_url }}/'");
       }
       pathname = pathname.slice({{ base_url|length }});
+{%- endif %}
 {%- if default %}
       if (false) {}
 {%- for v in vanguard %}
