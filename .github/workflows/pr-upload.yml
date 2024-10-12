@@ -28,7 +28,11 @@ jobs:
           rm -rf pages/$VERSION
       - uses: actions/download-artifact@v4
         with:
+          # This is required when downloading artifacts from a different repository
+          # or from a different workflow run:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event.workflow_run.id }}
+          name: pr-preview
           path: pages/${{ env.VERSION }}
       - name: Set Git user/email
         run: |
