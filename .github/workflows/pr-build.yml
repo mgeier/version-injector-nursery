@@ -33,11 +33,11 @@ jobs:
           repository: ${{ env.PAGES_STORAGE_REPO }}
       - name: Remove target directory
         run: |
-          rm -rf pages/$VERSION
+          rm -rf docs/$VERSION
       - uses: actions/download-artifact@v4
         with:
           name: docs
-          path: pages/${{ env.VERSION }}
+          path: docs/${{ env.VERSION }}
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -53,9 +53,12 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: pr-preview
-          path: pages/${{ env.VERSION }}
+          path: docs/${{ env.VERSION }}
           include-hidden-files: false
+      - name: Store PR number
+        run: |
+          echo $VERSION > VERSION
       - uses: actions/upload-artifact@v4
         with:
-          name: pr-event
-          path: ${{ github.event_path }}
+          name: pr-version
+          path: VERSION

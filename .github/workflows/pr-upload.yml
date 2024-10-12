@@ -9,7 +9,6 @@ on:
 # We need no permissions on this repo
 permissions: {}
 env:
-  VERSION: ${{ github.event.number }}
   PAGES_STORAGE_REPO: mgeier/version-injector-nursery-pull-request-previews
 jobs:
   deploy-pr-preview:
@@ -24,11 +23,10 @@ jobs:
           # or from a different workflow run:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event.workflow_run.id }}
-          name: pr-event
+          name: pr-version
       - name: Obtain PR number
         run: |
-          pr=$(jq -r ".number" event.json)
-          echo "VERSION=${pr}" >> $GITHUB_ENV
+          echo "VERSION=$(cat VERSION)" >> $GITHUB_ENV
       - name: Check out storage repository
         uses: actions/checkout@v4
         with:
@@ -36,20 +34,20 @@ jobs:
           token: ${{ secrets.PAGES_STORAGE_TOKEN }}
       - name: Remove target directory
         run: |
-          rm -rf pages/$VERSION
+          rm -rf docs/$VERSION
       - uses: actions/download-artifact@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event.workflow_run.id }}
           name: pr-preview
-          path: pages/${{ env.VERSION }}
+          path: docs/${{ env.VERSION }}
       - name: Set Git user/email
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
       - name: Commit modified files
         run: |
-          git add pages/$VERSION
+          git add docs/$VERSION
           git diff --cached --quiet || git commit -m "New/updated files for PR $VERSION"
       - name: Push commits
         run: |
