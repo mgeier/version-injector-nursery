@@ -12,7 +12,8 @@ on:
       - opened
       - reopened
       - synchronize
-
+# We need no permissions on this repo
+permissions: {}
 env:
   VERSION: ${{ github.event.number }}
   PAGES_STORAGE_REPO: mgeier/version-injector-nursery-pull-request-previews
