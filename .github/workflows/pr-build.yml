@@ -20,7 +20,7 @@ jobs:
   build:
     uses: ./.github/workflows/build-docs.yml
 
-  deploy-preview:
+  inject-pr-preview:
     runs-on: ubuntu-latest
     needs: build
     steps:
