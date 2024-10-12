@@ -32,6 +32,7 @@ base_path = Path(config['base-path'])
 if not base_path.exists():
     raise RuntimeError(f'"base-path" not found: {base_path}')
 base_url = config.get('base-url', '')
+# TODO: ensure that base_url either is empty or starts with '/'
 
 # TODO: when parsing TOML:
 #       - if no versions are available: error
@@ -94,8 +95,12 @@ if default:
         environment.get_template('index.html').render(
             default=default, base_url=base_url))
 else:
+    # TODO: create index page with all_listed_versions (if empty: ?)
     (base_path / 'index.html').unlink(missing_ok=True)
 
+(base_path / '404.html').write_text(
+    environment.get_template('404.html', globals=version_names).render(
+        default=default, base_url=base_url))
 
 version_list_template = environment.get_template(
     'version-list.html', globals=version_names)

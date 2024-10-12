@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<head>
+  <title>Error 404 (Resource not found)</title>
+  <script>
+    window.onload = () => {
+      document.getElementById("requested").innerHTML = window.location.href;
+      let pathname = window.location.pathname;
+{%- if base_url %}
+      if (!pathname.startsWith("{{ base_url }}/")) {
+        throw new Error("This 404 page should only be used within '{{ base_url }}/'");
+      }
+      pathname = pathname.slice({{ base_url|length }});
+{%- endif %}
+{%- if default %}
+      if (false) {}
+{%- for v in vanguard %}
+      else if (pathname.startsWith("/{{ v }}")) {}
+{%- endfor %}
+{%- for v in versions %}
+      else if (pathname.startsWith("/{{ v }}")) {}
+{%- endfor %}
+{%- for v in variants %}
+      else if (pathname.startsWith("/{{ v }}")) {}
+{%- endfor %}
+{%- for v in unlisted %}
+      else if (pathname.startsWith("/{{ v }}")) {}
+{%- endfor %}
+      else {
+        const redirecting = '{{ base_url }}/{{ default }}' + pathname;
+        let body = document.querySelector("body");
+        body.innerHTML = "Redirecting to <code>" + redirecting + "</code>";
+        window.location.pathname = redirecting;
+      }
+{%- endif %}
+    }
+  </script>
+</head>
+<h1>Error 404</h1>
+<p>The requested resource <code id="requested"></code> was not found.</p>
+<p>Maybe try the <a href="{{ base_url }}/">main page</a>?</p>
+{#- TODO: dynamically create links to all other versions using that path? #}
