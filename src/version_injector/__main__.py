@@ -98,7 +98,7 @@ else:
     (base_path / 'index.html').unlink(missing_ok=True)
 
 (base_path / '404.html').write_text(
-    environment.get_template('404.html').render(
+    environment.get_template('404.html', globals=version_names).render(
         default=default, base_url=base_url))
 
 version_list_template = environment.get_template(

@@ -1,14 +1,36 @@
-{# TODO: if /index.html: ??? #}
-
-{# TODO: check if the first path component is in any of the version lists #}
-{# TODO: if yes: don't redirect. #}
-{# TODO: if no (and if default is defined): redirect to default version using that path #}
-
-{# TODO: provide static link to /index.html #}
-{# TODO: provide dynamic links to all other versions using that path? #}
-
 <!DOCTYPE html>
-<title>Error 404 (Resource not found)</title>
+<head>
+  <title>Error 404 (Resource not found)</title>
+  <script>
+    window.onload = function () {
+      const href = window.location.href;
+      const pathname = window.location.pathname;
+      document.getElementById("requested").innerHTML = href;
+{%- if default %}
+      if (false) {}
+{%- for v in vanguard %}
+      else if (pathname.startsWith("/{{ v }}")) {}
+{%- endfor %}
+{%- for v in versions %}
+      else if (pathname.startsWith("/{{ v }}")) {}
+{%- endfor %}
+{%- for v in variants %}
+      else if (pathname.startsWith("/{{ v }}")) {}
+{%- endfor %}
+{%- for v in unlisted %}
+      else if (pathname.startsWith("/{{ v }}")) {}
+{%- endfor %}
+      else {
+        const redirecting = '/{{ default }}' + pathname;
+        let body = document.querySelector("body");
+        body.innerHTML = "Redirecting to <code>" + redirecting + "</code>";
+        window.location.pathname = redirecting;
+      }
+{%- endif %}
+    }
+  </script>
+</head>
 <h1>Error 404</h1>
-<p>The requested file <code>???</code> was not found.</p>
+<p>The requested resource <code id="requested"></code> was not found.</p>
 <p>Maybe try the <a href="{{ base_url }}/">main page</a>?</p>
+{#- TODO: dynamically create links to all other versions using that path? #}
