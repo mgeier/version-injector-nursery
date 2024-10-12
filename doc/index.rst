@@ -2,8 +2,6 @@
 
 ----
 
-dummy text
-
 .. toctree::
 
     motivation
