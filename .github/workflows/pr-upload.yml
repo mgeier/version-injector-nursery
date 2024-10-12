@@ -18,6 +18,17 @@ jobs:
       github.event.workflow_run.event == 'pull_request' &&
       github.event.workflow_run.conclusion == 'success'
     steps:
+      - uses: actions/download-artifact@v4
+        with:
+          # This is required when downloading artifacts from a different repository
+          # or from a different workflow run:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+          name: pr-event
+      - name: Obtain PR number
+        run: |
+          pr=$(jq -r ".number" event.json)
+          echo "VERSION=${pr}" >> $GITHUB_ENV
       - name: Check out storage repository
         uses: actions/checkout@v4
         with:
@@ -28,8 +39,6 @@ jobs:
           rm -rf pages/$VERSION
       - uses: actions/download-artifact@v4
         with:
-          # This is required when downloading artifacts from a different repository
-          # or from a different workflow run:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event.workflow_run.id }}
           name: pr-preview
