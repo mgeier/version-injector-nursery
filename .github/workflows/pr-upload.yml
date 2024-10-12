@@ -35,7 +35,6 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
       - name: Commit modified files
-        # TODO: commit top-level index.html?
         run: |
           git add pages/$VERSION
           git diff --cached --quiet || git commit -m "New/updated files for PR $VERSION"
