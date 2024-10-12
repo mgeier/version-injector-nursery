@@ -1,0 +1,52 @@
+# This is a separate workflow because PRs from forks don't get access to secrets,
+# see https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/
+name: Upload pull request preview
+on:
+  workflow_run:
+    workflows: ["Build pull request preview"]
+    types:
+      - completed
+# We need no permissions on this repo
+permissions: {}
+env:
+  VERSION: ${{ github.event.number }}
+  PAGES_STORAGE_REPO: mgeier/version-injector-nursery-pull-request-previews
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    if: >
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Check out storage repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.PAGES_STORAGE_REPO }}
+          token: ${{ secrets.PAGES_STORAGE_TOKEN }}
+      - name: Remove target directory
+        run: |
+          rm -rf pages/$VERSION
+      - uses: actions/download-artifact@v4
+        with:
+          name: pr-preview
+          path: pages/${{ env.VERSION }}
+      - name: Set Git user/email
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+      - name: Commit modified files
+        # TODO: commit top-level index.html?
+        run: |
+          git add pages/$VERSION
+          git diff --cached --quiet || git commit -m "New/updated files for PR $VERSION"
+      - name: Push commits
+        run: |
+          if ! git push
+          then
+            echo
+            echo "Did another job run in parallel?"
+            echo "If yes, please try re-running this job!"
+            echo
+            false
+          fi
+      # TODO: create/update PR comment

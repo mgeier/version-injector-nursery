@@ -24,11 +24,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
+      # We have no access to secrets here, so we can only get read permissions.
+      # Basically, we only need the config file at this point.
       - name: Check out storage repository
         uses: actions/checkout@v4
         with:
           repository: ${{ env.PAGES_STORAGE_REPO }}
-          token: ${{ secrets.PAGES_STORAGE_TOKEN }}
       - name: Remove target directory
         run: |
           rm -rf pages/$VERSION
@@ -48,27 +49,8 @@ jobs:
         # TODO: implement this!
         run: |
           #python -m version_injector.generic_warning $VERSION
-      - name: TEMPORARY! create dummy file
-        run: |
-          mkdir -p pages/$VERSION
-          echo "dummy content" > pages/$VERSION/index.html
-      - name: Set Git user/email
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-      - name: Commit modified files
-        # TODO: commit index.html?
-        run: |
-          git add pages/$VERSION
-          git diff --cached --quiet || git commit -m "New/updated files for PR $VERSION"
-      - name: Push commits
-        run: |
-          if ! git push
-          then
-            echo
-            echo "Did another job run in parallel?"
-            echo "If yes, please try re-running this job!"
-            echo
-            false
-          fi
-      # TODO: create/update PR comment
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pr-preview
+          path: pages/${{ env.VERSION }}
+          include-hidden-files: false
