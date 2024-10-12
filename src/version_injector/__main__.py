@@ -32,6 +32,7 @@ base_path = Path(config['base-path'])
 if not base_path.exists():
     raise RuntimeError(f'"base-path" not found: {base_path}')
 base_url = config.get('base-url', '')
+# TODO: ensure that base_url either is empty or starts with '/'
 
 # TODO: when parsing TOML:
 #       - if no versions are available: error

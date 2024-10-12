@@ -9,19 +9,19 @@
 {%- if default %}
       if (false) {}
 {%- for v in vanguard %}
-      else if (pathname.startsWith("/{{ v }}")) {}
+      else if (pathname.startsWith("{{ base_url }}/{{ v }}")) {}
 {%- endfor %}
 {%- for v in versions %}
-      else if (pathname.startsWith("/{{ v }}")) {}
+      else if (pathname.startsWith("{{ base_url }}/{{ v }}")) {}
 {%- endfor %}
 {%- for v in variants %}
-      else if (pathname.startsWith("/{{ v }}")) {}
+      else if (pathname.startsWith("{{ base_url }}/{{ v }}")) {}
 {%- endfor %}
 {%- for v in unlisted %}
-      else if (pathname.startsWith("/{{ v }}")) {}
+      else if (pathname.startsWith("{{ base_url }}/{{ v }}")) {}
 {%- endfor %}
       else {
-        const redirecting = '/{{ default }}' + pathname;
+        const redirecting = '{{ base_url }}/{{ default }}' + pathname;
         let body = document.querySelector("body");
         body.innerHTML = "Redirecting to <code>" + redirecting + "</code>";
         window.location.pathname = redirecting;
