@@ -55,3 +55,7 @@ jobs:
           name: pr-preview
           path: pages/${{ env.VERSION }}
           include-hidden-files: false
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pr-event
+          path: ${{ github.event_path }}
