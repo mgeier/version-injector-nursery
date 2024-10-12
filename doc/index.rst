@@ -1,5 +1,6 @@
-Version Injector
-================
+.. include:: ../README.rst
+
+----
 
 .. toctree::
 
