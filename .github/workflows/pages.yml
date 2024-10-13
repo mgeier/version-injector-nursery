@@ -10,7 +10,6 @@ on:
     # TODO: only allow on default branch?
     # TODO: don't build docs, only inject all existing docs
 env:
-  # TODO: use project variable for this?
   PAGES_STORAGE_REPO: mgeier/version-injector-nursery-pages
   # Here you can map branch/tag names to displayed version names.
   # We want to use "latest" for the main branch:
@@ -19,6 +18,8 @@ jobs:
   build:
     uses: ./.github/workflows/build-docs.yml
 
+  # If the workflow runs on a fork, the token is not available
+  # and we try to fail gracefully.
   check-token:
     runs-on: ubuntu-latest
     steps:
