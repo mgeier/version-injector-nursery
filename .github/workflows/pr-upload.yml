@@ -18,8 +18,8 @@ jobs:
       github.event.workflow_run.event == 'pull_request' &&
       github.event.workflow_run.conclusion == 'success'
     steps:
-      - run: echo '${{ toJSON(github.event.workflow_run.pull_requests) }}'
-      - run: echo '${{ toJSON(github.event.workflow_run) }}'
+      - name: Obtain PR number
+        run: echo '${{ github.event.workflow_run.referenced_workflows[0].ref }}' | sed 's|^refs/pull/\([^/]*\).*|VERSION=\1|' >> $GITHUB_ENV
       - name: Check out storage repository
         uses: actions/checkout@v4
         with:
