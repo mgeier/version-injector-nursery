@@ -6,8 +6,8 @@ on:
     workflows: ["PR preview: build"]
     types:
       - completed
-# We need no permissions on this repo
-permissions: {}
+permissions:
+  pull-requests: write
 env:
   PAGES_STORAGE_REPO: mgeier/version-injector-nursery-pull-request-previews
 jobs:
@@ -59,4 +59,9 @@ jobs:
             echo
             false
           fi
-      # TODO: create/update PR comment
+      - name: Create PR comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          number: ${{ env.PR_NUMBER }}
+          message: |
+            Docs preview: <https://mgeier.github.io/version-injector-nursery-pull-request-previews/${{ env.PR_NUMBER }}>.
