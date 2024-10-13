@@ -49,7 +49,8 @@ jobs:
       - name: Remove target directory
         run: |
           rm -rf pages/$VERSION
-      - uses: actions/download-artifact@v4
+      - name: Download built docs
+        uses: actions/download-artifact@v4
         with:
           name: docs
           path: pages/${{ env.VERSION }}
@@ -96,7 +97,7 @@ jobs:
             false
           fi
       # Don't forget to activate "pages" in your project settings!
-      - name: Upload artifact
+      - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: pages
