@@ -18,6 +18,8 @@ jobs:
       github.event.workflow_run.event == 'pull_request' &&
       github.event.workflow_run.conclusion == 'success'
     steps:
+      - run: echo '${{ toJSON(github.event.workflow_run.pull_requests) }}'
+      - run: echo '${{ toJSON(github.event.workflow_run) }}'
       - name: Check out storage repository
         uses: actions/checkout@v4
         with:
