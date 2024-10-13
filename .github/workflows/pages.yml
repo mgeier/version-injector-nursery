@@ -1,5 +1,5 @@
 # TODO: separate workflow (only manually triggered) for injecting all versions without building?
-name: Build docs for branches/tags
+name: Build and publish docs
 on:
   push:
     branches-ignore:
