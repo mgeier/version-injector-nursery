@@ -1,9 +1,9 @@
 # This is a separate workflow because PRs from forks don't get access to secrets,
 # see https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/
-name: Upload pull request preview
+name: "PR preview: deploy"
 on:
   workflow_run:
-    workflows: ["Build pull request preview"]
+    workflows: ["PR preview: build"]
     types:
       - completed
 # We need no permissions on this repo
