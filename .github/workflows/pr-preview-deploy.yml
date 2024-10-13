@@ -1,6 +1,7 @@
 # This is a separate workflow because PRs from forks don't get access to secrets,
 # see https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/
 name: "PR preview: deploy"
+run-name: ${{ github.event.workflow_run.display_title }}
 on:
   workflow_run:
     workflows: ["PR preview: build"]
@@ -33,7 +34,8 @@ jobs:
       - name: Remove target directory
         run: |
           rm -rf docs/$PR_NUMBER
-      - uses: actions/download-artifact@v4
+      - name: Download docs
+        uses: actions/download-artifact@v4
         with:
           # This is required when downloading artifacts from a different repository
           # or from a different workflow run:
