@@ -1,4 +1,4 @@
-name: Build pull request preview
+name: "PR preview: build"
 on:
   pull_request:
     types:
