@@ -9,7 +9,6 @@ on:
 # We need no permissions on this repo
 permissions: {}
 env:
-  VERSION: ${{ github.event.workflow_run.pull_requests[0].number }}
   PAGES_STORAGE_REPO: mgeier/version-injector-nursery-pull-request-previews
 jobs:
   deploy-pr-preview:
@@ -19,7 +18,13 @@ jobs:
       github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Obtain PR number
-        run: echo '${{ github.event.workflow_run.referenced_workflows[0].ref }}' | sed 's|^refs/pull/\([^/]*\).*|VERSION=\1|' >> $GITHUB_ENV
+        run: >
+          echo '${{ github.event.workflow_run.referenced_workflows[0].ref }}'
+          | sed 's|^refs/pull/\([^/]*\).*|PR_NUMBER=\1|'
+          >> $GITHUB_ENV
+      - name: Make sure it's non-empty
+        run: |
+          test -n "$PR_NUMBER" || false
       - name: Check out storage repository
         uses: actions/checkout@v4
         with:
@@ -27,7 +32,7 @@ jobs:
           token: ${{ secrets.PAGES_STORAGE_TOKEN }}
       - name: Remove target directory
         run: |
-          rm -rf docs/$VERSION
+          rm -rf docs/$PR_NUMBER
       - uses: actions/download-artifact@v4
         with:
           # This is required when downloading artifacts from a different repository
@@ -35,15 +40,15 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event.workflow_run.id }}
           name: pr-preview
-          path: docs/${{ env.VERSION }}
+          path: docs/${{ env.PR_NUMBER }}
       - name: Set Git user/email
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
       - name: Commit modified files
         run: |
-          git add docs/$VERSION
-          git diff --cached --quiet || git commit -m "New/updated files for PR $VERSION"
+          git add docs/$PR_NUMBER
+          git diff --cached --quiet || git commit -m "New/updated files for PR $PR_NUMBER"
       - name: Push commits
         run: |
           if ! git push
