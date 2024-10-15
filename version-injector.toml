@@ -1,7 +1,3 @@
-base-path = "pages"
-# default: empty string
-#base-url = "/my-project"
-
 # if not specified, the first available entry in
 # ["versions", "vanguard", "variants"] is used
 #default = "latest"
@@ -35,5 +31,3 @@ versions-warning = "versions-warning.html"
 
 # only needed if (some of) the default templates shall be overridden
 #templates-path = "templates"
-# TODO: rename to template-path?
-#template-path = "templates"

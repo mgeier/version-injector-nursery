@@ -5,11 +5,11 @@
     window.onload = () => {
       document.getElementById("requested").innerHTML = window.location.href;
       let pathname = window.location.pathname;
-{%- if base_url %}
-      if (!pathname.startsWith("{{ base_url }}/")) {
-        throw new Error("This 404 page should only be used within '{{ base_url }}/'");
+{%- if pathname_prefix %}
+      if (!pathname.startsWith("{{ pathname_prefix }}/")) {
+        throw new Error("This 404 page should only be used within '{{ pathname_prefix }}/'");
       }
-      pathname = pathname.slice({{ base_url|length }});
+      pathname = pathname.slice({{ pathname_prefix|length }});
 {%- endif %}
 {%- if default %}
       if (false) {}
@@ -26,7 +26,7 @@
       else if (pathname.startsWith("/{{ v }}")) {}
 {%- endfor %}
       else {
-        const redirecting = '{{ base_url }}/{{ default }}' + pathname;
+        const redirecting = '{{ pathname_prefix }}/{{ default }}' + pathname;
         let body = document.querySelector("body");
         body.innerHTML = "Redirecting to <code>" + redirecting + "</code>";
         window.location.pathname = redirecting;
@@ -37,5 +37,5 @@
 </head>
 <h1>Error 404</h1>
 <p>The requested resource <code id="requested"></code> was not found.</p>
-<p>Maybe try the <a href="{{ base_url }}/">main page</a>?</p>
+<p>Maybe try the <a href="{{ pathname_prefix }}/">main page</a>?</p>
 {#- TODO: dynamically create links to all other versions using that path? #}

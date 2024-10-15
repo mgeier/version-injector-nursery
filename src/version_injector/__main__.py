@@ -19,7 +19,13 @@ parser.add_argument(
     help='name of version that has been added/updated')
 parser.add_argument(
     'category', nargs='?', choices=CATEGORIES,
-    help="if version doesn't exist yet, it will be added to this category")
+    help="if VERSION doesn't exist yet, it will be added to this category")
+parser.add_argument(
+    '--docs-path', required=True, type=Path,
+    help='where the different versions of the documentation are stored')
+parser.add_argument(
+    '--pathname-prefix', default='', type=str,
+    help="beginning of the 'pathname' component of the final URL")
 args = parser.parse_args()
 
 # TODO: no argument: inject all versions
@@ -28,11 +34,10 @@ config_file = TOMLFile('version-injector.toml')
 # TODO: better exception message?
 # If file doesn't exist in current directory -> exception
 config = config_file.read()
-base_path = Path(config['base-path'])
-if not base_path.exists():
-    raise RuntimeError(f'"base-path" not found: {base_path}')
-base_url = config.get('base-url', '')
-# TODO: ensure that base_url either is empty or starts with '/'
+if not args.docs_path.exists():
+    parser.error(f"'--docs-path' not found: {args.docs_path}")
+if args.pathname_prefix and not args.pathname_prefix.startswith('/'):
+    parser.error("'--pathname-prefix' must be empty string or start with '/'")
 
 # TODO: when parsing TOML:
 #       - if no versions are available: error
@@ -48,7 +53,7 @@ if args.version:
         parser.error('either 0 or 2 arguments are required')
     if args.version not in all_versions:
         names = config.setdefault(args.category, [])
-        if not (base_path / args.version).is_dir():
+        if not (args.docs_path / args.version).is_dir():
             parser.exit(f'directory not found: {args.version!r}')
         names.insert(0, args.version)
         config_file.write(config)
@@ -86,21 +91,21 @@ default = config.get('default', (
     config.get('vanguard') or
     config.get('variants') or [None])[0])
 if default:
-    default_path = base_path / default
+    default_path = args.docs_path / default
     if not default_path.exists():
         raise RuntimeError(f'default directory not found: {default_path}')
     if default not in all_listed_versions:
         raise RuntimeError(f'unlisted default version: {default!r}')
-    (base_path / 'index.html').write_text(
+    (args.docs_path / 'index.html').write_text(
         environment.get_template('index.html').render(
-            default=default, base_url=base_url))
+            default=default, pathname_prefix=args.pathname_prefix))
 else:
     # TODO: create index page with all_listed_versions (if empty: ?)
-    (base_path / 'index.html').unlink(missing_ok=True)
+    (args.docs_path / 'index.html').unlink(missing_ok=True)
 
-(base_path / '404.html').write_text(
+(args.docs_path / '404.html').write_text(
     environment.get_template('404.html', globals=version_names).render(
-        default=default, base_url=base_url))
+        default=default, pathname_prefix=args.pathname_prefix))
 
 version_list_template = environment.get_template(
     'version-list.html', globals=version_names)
@@ -123,28 +128,28 @@ def prepare_injection(current, relative_html_path):
         if v not in links:
             if v == current:
                 # we know that this file exists
-                links[v] = f'{base_url}/{v}/{relative_html_url}'
+                links[v] = f'{args.pathname_prefix}/{v}/{relative_html_url}'
                 continue
-            new_path = base_path / v / relative_html_path
+            new_path = args.docs_path / v / relative_html_path
             while not new_path.exists():
                 new_path = new_path.parent
             links[v] = '/'.join([
-                base_url, new_path.relative_to(base_path).as_posix()])
+                args.pathname_prefix,
+                new_path.relative_to(args.docs_path).as_posix()])
+    context = {
+        'current': current,
+        'default': default,
+        'links': links,
+    }
 
     def injection(section):
         if section == 'VERSIONS':
-            return version_list_template.render({
-                'links': links,
-                'current': current,
-            })
+            return version_list_template.render(context)
         elif section == 'WARNING':
             if (default and current != default and warning_template
                     # the first entry in "versions" gets no warning
                     and current != (config.get('versions') or [''])[0]):
-                return warning_template.render(replacement={
-                    'name': default,
-                    'url': links[default],
-                })
+                return warning_template.render(context)
         return ''
 
     return injection
@@ -152,7 +157,7 @@ def prepare_injection(current, relative_html_path):
 
 def inject(current):
     try:
-        inject_files(base_path, current, prepare_injection)
+        inject_files(args.docs_path, current, prepare_injection)
     except RuntimeError as e:
         parser.exit(str(e))
 

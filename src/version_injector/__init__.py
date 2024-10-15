@@ -1,10 +1,10 @@
 __version__ = '0.0.0'
 
 
-def inject_files(base_path, current, prepare_injection):
+def inject_files(docs_path, current, prepare_injection):
     # TODO: proper logging
     print('injecting into', current)
-    current_path = base_path / current
+    current_path = docs_path / current
     for html_path in current_path.rglob('*.html'):
         inject_file(
             html_path, prepare_injection(
