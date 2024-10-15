@@ -47,7 +47,7 @@ jobs:
           $PR_NUMBER
           unlisted
           --docs-path $DOCS
-          --pathname-prefix ${{ steps.configure-pages.outputs.base_path }}
+          --pathname-prefix /${{ github.event.repository.name }}
       - name: Upload injected docs
         uses: actions/upload-artifact@v4
         with:
