@@ -52,12 +52,13 @@ jobs:
         run: |
           python -m pip install git+https://github.com/mgeier/version-injector-nursery.git@$REF
       - name: Inject PR warnings
+        # TODO: get --pathname-prefix from variable?
         run: >
           python -m version_injector
           $PR_NUMBER
           unlisted
           --docs-path $DOCS
-          --pathname-prefix /${{ github.event.repository.name }}
+          --pathname-prefix /version-injector-nursery-pull-request-previews
       - name: Set Git user/email
         run: |
           git config --global user.name 'github-actions[bot]'
