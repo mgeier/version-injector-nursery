@@ -10,6 +10,7 @@ on:
 permissions:
   pull-requests: write
 env:
+  REF: ${{ github.event.workflow_run.referenced_workflows[0].ref }}
   DOCS: docs
   PAGES_STORAGE_REPO: mgeier/version-injector-nursery-pull-request-previews
 jobs:
@@ -20,10 +21,8 @@ jobs:
       github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Obtain PR number
-        run: >
-          echo '${{ github.event.workflow_run.referenced_workflows[0].ref }}'
-          | sed 's|^refs/pull/\([^/]*\).*|PR_NUMBER=\1|'
-          >> $GITHUB_ENV
+        run: |
+          echo $REF | sed 's|^refs/pull/\([^/]*\).*|PR_NUMBER=\1|' >> $GITHUB_ENV
       - name: Make sure it's non-empty
         run: |
           test -n "$PR_NUMBER" || false
@@ -42,15 +41,31 @@ jobs:
           # or from a different workflow run:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event.workflow_run.id }}
-          name: pr-preview
+          name: docs
           path: ${{ env.DOCS }}/${{ env.PR_NUMBER }}
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3
+      - name: Install version_injector
+        # TODO: "normal" users should install the release from PyPI:
+        run: |
+          python -m pip install git+https://github.com/mgeier/version-injector-nursery.git@$REF
+      - name: Inject PR warnings
+        run: >
+          python -m version_injector
+          $PR_NUMBER
+          unlisted
+          --docs-path $DOCS
+          --pathname-prefix /${{ github.event.repository.name }}
       - name: Set Git user/email
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
       - name: Commit modified files
         run: |
-          git add $DOCS/$PR_NUMBER
+          git add version-injector.toml
+          git add $DOCS
           git diff --cached --quiet || git commit -m "New/updated files for PR $PR_NUMBER"
       - name: Push commits
         run: |
