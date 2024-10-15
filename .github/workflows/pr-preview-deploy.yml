@@ -10,6 +10,7 @@ on:
 permissions:
   pull-requests: write
 env:
+  DOCS: docs
   PAGES_STORAGE_REPO: mgeier/version-injector-nursery-pull-request-previews
 jobs:
   deploy-pr-preview:
@@ -33,7 +34,7 @@ jobs:
           token: ${{ secrets.PAGES_STORAGE_TOKEN }}
       - name: Remove target directory
         run: |
-          rm -rf docs/$PR_NUMBER
+          rm -rf $DOCS/$PR_NUMBER
       - name: Download docs
         uses: actions/download-artifact@v4
         with:
@@ -42,14 +43,14 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event.workflow_run.id }}
           name: pr-preview
-          path: docs/${{ env.PR_NUMBER }}
+          path: ${{ env.DOCS }}/${{ env.PR_NUMBER }}
       - name: Set Git user/email
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
       - name: Commit modified files
         run: |
-          git add docs/$PR_NUMBER
+          git add $DOCS/$PR_NUMBER
           git diff --cached --quiet || git commit -m "New/updated files for PR $PR_NUMBER"
       - name: Push commits
         run: |

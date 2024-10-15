@@ -8,6 +8,7 @@ on:
 # We need no permissions on this repo
 permissions: {}
 env:
+  DOCS: docs
   PR_NUMBER: ${{ github.event.number }}
   PAGES_STORAGE_REPO: mgeier/version-injector-nursery-pull-request-previews
 jobs:
@@ -19,19 +20,19 @@ jobs:
     needs: build
     steps:
       # We have no access to secrets here, so we can only get read permissions.
-      # Basically, we only need the config file at this point.
+      # Basically, we only need the config file and the templates at this point.
       - name: Check out storage repository
         uses: actions/checkout@v4
         with:
           repository: ${{ env.PAGES_STORAGE_REPO }}
       - name: Remove target directory
         run: |
-          rm -rf docs/$PR_NUMBER
+          rm -rf $DOCS/$PR_NUMBER
       - name: Download built docs
         uses: actions/download-artifact@v4
         with:
           name: docs
-          path: docs/${{ env.PR_NUMBER }}
+          path: ${{ env.DOCS }}/${{ env.PR_NUMBER }}
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -48,5 +49,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pr-preview
-          path: docs/${{ env.PR_NUMBER }}
+          path: ${{ env.DOCS }}/${{ env.PR_NUMBER }}
           include-hidden-files: false
