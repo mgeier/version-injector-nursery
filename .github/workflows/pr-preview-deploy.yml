@@ -10,7 +10,6 @@ on:
 permissions:
   pull-requests: write
 env:
-  REF: ${{ github.event.workflow_run.referenced_workflows[0].ref }}
   DOCS: docs
   PAGES_STORAGE_REPO: mgeier/version-injector-nursery-pull-request-previews
 jobs:
@@ -21,8 +20,10 @@ jobs:
       github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Obtain PR number
-        run: |
-          echo $REF | sed 's|^refs/pull/\([^/]*\).*|PR_NUMBER=\1|' >> $GITHUB_ENV
+        run: >
+          echo ${{ github.event.workflow_run.referenced_workflows[0].ref }}
+          | sed 's|^refs/pull/\([^/]*\).*|PR_NUMBER=\1|'
+          >> $GITHUB_ENV
       - name: Make sure it's non-empty
         run: |
           test -n "$PR_NUMBER" || false
@@ -50,7 +51,7 @@ jobs:
       - name: Install version_injector
         # TODO: "normal" users should install the release from PyPI:
         run: |
-          python -m pip install git+https://github.com/mgeier/version-injector-nursery.git@$REF
+          python -m pip install git+https://github.com/mgeier/version-injector-nursery.git@refs/pull/$PR_NUMBER/head
       - name: Inject PR warnings
         # TODO: get --pathname-prefix from variable?
         run: >
