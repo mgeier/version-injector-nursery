@@ -54,6 +54,7 @@ jobs:
           python -m pip install git+https://github.com/mgeier/version-injector-nursery.git@refs/pull/$PR_NUMBER/head
       - name: Inject PR warnings
         # TODO: get --pathname-prefix from variable?
+        # TODO: we probably don't need to re-inject all PRs, only the current one?
         run: >
           python -m version_injector
           $PR_NUMBER

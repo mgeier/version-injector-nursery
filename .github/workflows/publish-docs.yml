@@ -1,4 +1,3 @@
-# TODO: separate workflow (only manually triggered) for injecting all versions without building?
 name: Build and publish docs
 on:
   push:
@@ -7,8 +6,6 @@ on:
     tags-ignore:
       # - '...'
   workflow_dispatch:
-    # TODO: only allow on default branch?
-    # TODO: don't build docs, only inject all existing docs
 env:
   PAGES_STORAGE_REPO: mgeier/version-injector-nursery-pages
   DOCS: docs
