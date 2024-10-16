@@ -5,8 +5,6 @@ from pathlib import Path
 import jinja2
 from tomlkit.toml_file import TOMLFile
 
-from version_injector import inject_files
-
 CATEGORIES = 'vanguard', 'versions', 'variants', 'unlisted'
 
 parser = argparse.ArgumentParser(
@@ -50,7 +48,7 @@ if len(all_versions) != len(set(all_versions)):
     parser.exit(f'duplicate version names')
 if args.version:
     if not args.category:
-        parser.error('either 0 or 2 arguments are required')
+        parser.error('either 0 or 2 positional arguments are required')
     if args.version not in all_versions:
         names = config.setdefault(args.category, [])
         if not (args.docs_path / args.version).is_dir():
@@ -68,7 +66,7 @@ _templates_path = config.get('templates-path')
 # TODO: make sure it's relative to the TOML location
 if _templates_path:
     if not Path(_templates_path).exists():
-        raise RuntimeError(f'"templates-path" not found: {_templates_path!r}')
+        parser.exit(f'"templates-path" not found: {_templates_path!r}')
     _loaders.append(
         jinja2.FileSystemLoader(_templates_path, followlinks=True))
 _loaders.append(jinja2.PackageLoader('version_injector', '_templates'))
@@ -78,7 +76,7 @@ environment = jinja2.Environment(
 )
 
 version_names = { c: config.get(c, []) for c in CATEGORIES }
-all_listed_versions = [
+listed_versions = [
     v for c in CATEGORIES if c != 'unlisted' for v in version_names[c]]
 
 warning_templates = {
@@ -93,14 +91,14 @@ default = config.get('default', (
 if default:
     default_path = args.docs_path / default
     if not default_path.exists():
-        raise RuntimeError(f'default directory not found: {default_path}')
-    if default not in all_listed_versions:
-        raise RuntimeError(f'unlisted default version: {default!r}')
+        parser.exit(f'default directory not found: {default_path}')
+    if default not in listed_versions:
+        parser.exit(f'unlisted default version: {default!r}')
     (args.docs_path / 'index.html').write_text(
         environment.get_template('index.html').render(
             default=default, pathname_prefix=args.pathname_prefix))
 else:
-    # TODO: create index page with all_listed_versions (if empty: ?)
+    # TODO: create index page with listed_versions (if empty: ?)
     (args.docs_path / 'index.html').unlink(missing_ok=True)
 
 (args.docs_path / '404.html').write_text(
@@ -111,56 +109,83 @@ version_list_template = environment.get_template(
     'version-list.html', globals=version_names)
 
 
-# this will be re-used by all inject() calls
 cache = {}
 
 
-def prepare_injection(current, relative_html_path):
-    relative_html_url = relative_html_path.as_posix()
-    links = cache.setdefault(relative_html_url, {})
-    for c in CATEGORIES:
-        if current in version_names[c]:
-            warning_template = warning_templates.get(c)
+def inject_file(path, injection):
+    remainder = path.read_text()
+    chunks = []
+    while remainder:
+        left = '<!--version-injector-injects-'
+        prefix, left, remainder = remainder.partition(left)
+        chunks.append(prefix)
+        if left == '':
+            # no more markers found
+            assert remainder == ''
             break
-    else:
-        assert False
-    for v in all_listed_versions:
-        if v not in links:
-            if v == current:
-                # we know that this file exists
-                links[v] = f'{args.pathname_prefix}/{v}/{relative_html_url}'
-                continue
-            new_path = args.docs_path / v / relative_html_path
-            while not new_path.exists():
-                new_path = new_path.parent
-            links[v] = '/'.join([
-                args.pathname_prefix,
-                new_path.relative_to(args.docs_path).as_posix()])
-    context = {
-        'current': current,
-        'default': default,
-        'links': links,
-    }
-
-    def injection(section):
-        if section == 'VERSIONS':
-            return version_list_template.render(context)
-        elif section == 'WARNING':
-            if (default and current != default and warning_template
-                    # the first entry in "versions" gets no warning
-                    and current != (config.get('versions') or [''])[0]):
-                return warning_template.render(context)
-        return ''
-
-    return injection
+        chunks.append(left)
+        right = '-below-->'
+        section, right, remainder = remainder.partition(right)
+        # If the marker is malformed, "section" might span multiple lines
+        if right == '' or '\n' in section:
+            marker = left + section.split('\n')[0]
+            parser.exit(f'malformed opening marker: {marker!r}')
+        chunks.append(section)
+        chunks.append(right)
+        closer = f'<!--version-injector-injects-{section}-above-->'
+        discard, closer, remainder = remainder.partition(closer)
+        if closer == '':
+            parser.exit(f'no closing marker for {section!r}')
+        chunks.append('\n')  # Any existing newlines were discarded
+        chunks.append(injection(section))
+        chunks.append(closer)
+    path.write_text(''.join(chunks))
 
 
-def inject(current):
-    try:
-        inject_files(args.docs_path, current, prepare_injection)
-    except RuntimeError as e:
-        parser.exit(str(e))
+def inject_directory(current):
+    # TODO: proper logging
+    print('injecting into', current)
+    current_path = args.docs_path / current
+    for path in current_path.rglob('*.html'):
+        relative_path = path.relative_to(current_path)
+        relative_url = relative_path.as_posix()
+        links = cache.setdefault(relative_url, {})
+        for c in CATEGORIES:
+            if current in version_names[c]:
+                warning_template = warning_templates.get(c)
+                break
+        else:
+            assert False
+        for v in listed_versions:
+            if v not in links:
+                if v == current:
+                    # we know that this file exists
+                    links[v] = f'{args.pathname_prefix}/{v}/{relative_url}'
+                    continue
+                new_path = args.docs_path / v / relative_path
+                while not new_path.exists():
+                    new_path = new_path.parent
+                links[v] = '/'.join([
+                    args.pathname_prefix,
+                    new_path.relative_to(args.docs_path).as_posix()])
+        context = {
+            'current': current,
+            'default': default,
+            'links': links,
+        }
+
+        def injection(section):
+            if section == 'VERSIONS':
+                return version_list_template.render(context)
+            elif section == 'WARNING':
+                if (default and current != default and warning_template
+                        # the first entry in "versions" gets no warning
+                        and current != (config.get('versions') or [''])[0]):
+                    return warning_template.render(context)
+            return ''
+
+        inject_file(path, injection)
 
 
 for v in all_versions:
-    inject(v)
+    inject_directory(v)
