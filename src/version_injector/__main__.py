@@ -148,8 +148,7 @@ def inject_directory(current):
     current_path = args.docs_path / current
     for path in current_path.rglob('*.html'):
         relative_path = path.relative_to(current_path)
-        relative_url = relative_path.as_posix()
-        links = cache.setdefault(relative_url, {})
+        links = cache.setdefault(relative_path.as_posix(), {})
         for c in CATEGORIES:
             if current in version_names[c]:
                 warning_template = warning_templates.get(c)
@@ -158,10 +157,6 @@ def inject_directory(current):
             assert False
         for v in listed_versions:
             if v not in links:
-                if v == current:
-                    # we know that this file exists
-                    links[v] = f'{args.pathname_prefix}/{v}/{relative_url}'
-                    continue
                 new_path = args.docs_path / v / relative_path
                 while not new_path.exists():
                     new_path = new_path.parent
