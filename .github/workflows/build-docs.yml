@@ -23,10 +23,23 @@ jobs:
         # TODO: use requirements.txt?
         run: |
           $PIP install sphinx insipid-sphinx-theme
-      - name: Build with Sphinx
+      - name: Build HTML
         run: |
           $SPHINX doc _build/html --doctree-dir _build/doctrees -b html
-      # TODO: build PDF? move it to the HTML directory?
+      - name: Build LaTeX
+        run: |
+          $SPHINX doc _build/latex --doctree-dir _build/doctrees -b latex
+      - name: Setup tectonic
+        uses: wtfjoke/setup-tectonic@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run tectonic
+        working-directory: _build/latex
+        run: tectonic version-injector.tex
+      - name: Move PDF to HTML directory
+        working-directory: _build
+        # TODO: add version to file name?
+        run: mv latex/version-injector.pdf html/
       - name: Upload built docs
         uses: actions/upload-artifact@v4
         with:
