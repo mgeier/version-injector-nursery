@@ -135,7 +135,7 @@ def inject_file(path, injection):
     remainder = path.read_text()
     chunks = []
     while remainder:
-        left = '<!--version-injector-injects-'
+        left = '<!--inject-'
         prefix, left, remainder = remainder.partition(left)
         chunks.append(prefix)
         if left == '':
@@ -151,7 +151,7 @@ def inject_file(path, injection):
             parser.exit(f'malformed opening marker: {marker!r}')
         chunks.append(section)
         chunks.append(right)
-        closer = f'<!--version-injector-injects-{section}-above-->'
+        closer = f'<!--inject-{section}-above-->'
         discard, closer, remainder = remainder.partition(closer)
         if closer == '':
             parser.exit(f'no closing marker for {section!r}')
