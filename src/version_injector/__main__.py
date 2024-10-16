@@ -112,6 +112,25 @@ version_list_template = environment.get_template(
 cache = {}
 
 
+def create_context(current, relative_path):
+    # Find links from the current version of the current HTML file
+    # to the same file (or some parent directory) in all listed versions.
+    links = cache.setdefault(relative_path, {})
+    for v in listed_versions:
+        if v not in links:
+            new_path = args.docs_path / v / relative_path
+            while not new_path.exists():
+                new_path = new_path.parent
+            links[v] = '/'.join([
+                args.pathname_prefix,
+                new_path.relative_to(args.docs_path).as_posix()])
+    return {
+        'current': current,
+        'default': default,
+        'links': links,
+    }
+
+
 def inject_file(path, injection):
     remainder = path.read_text()
     chunks = []
@@ -145,29 +164,15 @@ def inject_file(path, injection):
 def inject_directory(current):
     # TODO: proper logging
     print('injecting into', current)
+    for c in CATEGORIES:
+        if current in version_names[c]:
+            warning_template = warning_templates.get(c)
+            break
+    else:
+        assert False
     current_path = args.docs_path / current
     for path in current_path.rglob('*.html'):
-        relative_path = path.relative_to(current_path)
-        links = cache.setdefault(relative_path.as_posix(), {})
-        for c in CATEGORIES:
-            if current in version_names[c]:
-                warning_template = warning_templates.get(c)
-                break
-        else:
-            assert False
-        for v in listed_versions:
-            if v not in links:
-                new_path = args.docs_path / v / relative_path
-                while not new_path.exists():
-                    new_path = new_path.parent
-                links[v] = '/'.join([
-                    args.pathname_prefix,
-                    new_path.relative_to(args.docs_path).as_posix()])
-        context = {
-            'current': current,
-            'default': default,
-            'links': links,
-        }
+        context = create_context(current, path.relative_to(current_path))
 
         def injection(section):
             if section == 'VERSIONS':
