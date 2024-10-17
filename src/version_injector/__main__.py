@@ -12,11 +12,10 @@ parser = argparse.ArgumentParser(
     description=__doc__,
     formatter_class=argparse.RawDescriptionHelpFormatter)
 parser.add_argument(
-    'version', nargs='?', metavar='VERSION',
-    type=str,
+    'version', metavar='VERSION', type=str,
     help='name of version that has been added/updated')
 parser.add_argument(
-    'category', nargs='?', choices=CATEGORIES,
+    'category', choices=CATEGORIES,
     help="if VERSION doesn't exist yet, it will be added to this category")
 parser.add_argument(
     '--docs-path', required=True, type=Path,
@@ -25,8 +24,6 @@ parser.add_argument(
     '--pathname-prefix', default='', type=str,
     help="beginning of the 'pathname' component of the final URL")
 args = parser.parse_args()
-
-# TODO: no argument: inject all versions
 
 config_file = TOMLFile('version-injector.toml')
 # TODO: better exception message?
@@ -46,20 +43,16 @@ all_versions = [v for c in CATEGORIES for v in config.get(c, [])]
 if len(all_versions) != len(set(all_versions)):
     # TODO: show which are duplicates
     parser.exit(f'duplicate version names')
-if args.version:
-    if not args.category:
-        parser.error('either 0 or 2 positional arguments are required')
-    if args.version not in all_versions:
-        names = config.setdefault(args.category, [])
-        if not (args.docs_path / args.version).is_dir():
-            parser.exit(f'directory not found: {args.version!r}')
-        names.insert(0, args.version)
-        config_file.write(config)
-        # re-compute because a version has been added:
-        all_versions = [v for c in CATEGORIES for v in config.get(c, [])]
-else:
-    # TODO: delete subdirectories that are not in all_versions
-    pass
+if args.version not in all_versions:
+    names = config.setdefault(args.category, [])
+    if not (args.docs_path / args.version).is_dir():
+        parser.exit(f'directory not found: {args.version!r}')
+    names.insert(0, args.version)
+    config_file.write(config)
+    # re-compute because a version has been added:
+    all_versions = [v for c in CATEGORIES for v in config.get(c, [])]
+
+# TODO: delete subdirectories that are not in all_versions
 
 _loaders = []
 _templates_path = config.get('templates-path')
