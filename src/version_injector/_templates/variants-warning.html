@@ -1,6 +1,11 @@
+{%- if current != default %}
 <div class="admonition note">
   <p class="admonition-title">Note</p>
-  <p>This is an experimental version. The default version is available here:
+  <p>This is an experimental version.
+{%- if default %}
+    The default version is available here:
     <a class="reference internal" href="{{ links[default] }}">{{ default }}</a>.
+{%- endif %}
   </p>
 </div>
+{%- endif %}

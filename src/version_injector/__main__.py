@@ -173,11 +173,8 @@ def inject_directory(current):
         def injection(section):
             if section == 'VERSIONS':
                 return version_list_template.render(context)
-            elif section == 'WARNING':
-                if (default and current != default and warning_template
-                        # the first entry in "versions" gets no warning
-                        and current != (config.get('versions') or [''])[0]):
-                    return warning_template.render(context)
+            elif section == 'WARNING' and warning_template:
+                return warning_template.render(context)
             return ''
 
         inject_file(path, injection)

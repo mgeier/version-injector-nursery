@@ -1,6 +1,12 @@
+{#- the first entry in "versions" never gets a warning #}
+{%- if current != default and current != versions[0] %}
 <div class="admonition warning">
   <p class="admonition-title">Warning</p>
-  <p>This page is outdated. A newer version is available here:
+  <p>This page is outdated.
+{%- if default %}
+    A newer version is available here:
     <a class="reference internal" href="{{ links[default] }}">{{ default }}</a>.
+{%- endif %}
   </p>
 </div>
+{%- endif %}
