@@ -18,6 +18,9 @@ parser.add_argument(
     'category', choices=CATEGORIES,
     help="if VERSION doesn't exist yet, it will be added to this category")
 parser.add_argument(
+    '--inject-only-one', action='store_true',
+    help='only inject into the given version (default: all versions)')
+parser.add_argument(
     '--docs-path', required=True, type=Path,
     help='where the different versions of the documentation are stored')
 parser.add_argument(
@@ -180,5 +183,8 @@ def inject_directory(current):
         inject_file(path, injection)
 
 
-for v in all_versions:
-    inject_directory(v)
+if args.inject_only_one:
+    inject_directory(args.version)
+else:
+    for v in all_versions:
+        inject_directory(v)
