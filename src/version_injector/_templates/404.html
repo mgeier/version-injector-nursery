@@ -4,6 +4,8 @@
   <script>
     window.onload = () => {
       document.getElementById("requested").innerHTML = window.location.href;
+{%- set listed = vanguard + versions + variants %}
+{%- if default or listed %}
       let pathname = window.location.pathname;
 {%- if pathname_prefix %}
       if (!pathname.startsWith("{{ pathname_prefix }}/")) {
@@ -13,33 +15,11 @@
 {%- endif %}
       let pathname_suffix = "";
       let alternative_versions = [];
-{%- for v in vanguard %}
-      if (pathname.startsWith("/{{ v }}/")) {
-        pathname_suffix = pathname.slice({{ 1 + v|length }});
-      } else {
-        alternative_versions.push("{{ v }}");
-      }
-{%- endfor %}
-{%- for v in versions %}
-      if (pathname.startsWith("/{{ v }}/")) {
-        pathname_suffix = pathname.slice({{ 1 + v|length }});
-      } else {
-        alternative_versions.push("{{ v }}");
-      }
-{%- endfor %}
-{%- for v in variants %}
-      if (pathname.startsWith("/{{ v }}/")) {
-        pathname_suffix = pathname.slice({{ 1 + v|length }});
-      } else {
-        alternative_versions.push("{{ v }}");
-      }
+{%- for v in listed %}
+      if (pathname.startsWith("/{{ v }}/")) { pathname_suffix = pathname.slice({{ 1 + v|length }}); } else { alternative_versions.push("{{ v }}"); }
 {%- endfor %}
 {%- for v in unlisted %}
-      if (pathname.startsWith("/{{ v }}/")) {
-        pathname_suffix = pathname.slice({{ 1 + v|length }});
-      } else {
-        // NB: we don't want to provide links to unlisted versions.
-      }
+      if (pathname.startsWith("/{{ v }}/")) { pathname_suffix = pathname.slice({{ 1 + v|length }}); }
 {%- endfor %}
 {%- if default %}
       if (pathname_suffix === "") {
@@ -59,6 +39,7 @@
           ul.appendChild(document.createElement("li")).appendChild(a);
         }
       }
+{%- endif %}
     }
   </script>
 </head>
