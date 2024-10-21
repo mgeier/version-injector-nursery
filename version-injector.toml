@@ -8,6 +8,7 @@ vanguard = [
 ]
 
 # versions (i.e. Git tags) will be injected in the given order
+# NB: the first entry in "versions" will never get a warning
 versions = [
     "0.1.1",
     "0.1.0",
@@ -21,13 +22,6 @@ variants = [
 unlisted = [
     "experimental-af",
 ]
-
-vanguard-warning = "vanguard-warning.html"
-# NB: the first entry in "versions" will never get a warning
-versions-warning = "versions-warning.html"
-# if no template is specified, no warnings will be injected
-#variants-warning = "variants-warning.html"
-#unlisted-warning = "unlisted-warning.html"
 
 # only needed if (some of) the default templates shall be overridden
 #templates-path = "templates"

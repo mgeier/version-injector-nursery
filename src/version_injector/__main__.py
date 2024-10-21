@@ -76,8 +76,8 @@ listed_versions = [
     v for c in CATEGORIES if c != 'unlisted' for v in version_names[c]]
 
 warning_templates = {
-    c: environment.get_template(filename, globals=version_names)
-    for c in CATEGORIES if (filename := config.get(c + '-warning'))
+    c: environment.get_template(c + '-warning.html', globals=version_names)
+    for c in CATEGORIES
 }
 
 default = config.get('default', (
@@ -162,7 +162,7 @@ def inject_directory(current):
     print('injecting into', current)
     for c in CATEGORIES:
         if current in version_names[c]:
-            warning_template = warning_templates.get(c)
+            warning_template = warning_templates[c]
             break
     else:
         assert False
@@ -173,7 +173,7 @@ def inject_directory(current):
         def injection(section):
             if section == 'VERSIONS':
                 return version_list_template.render(context)
-            elif section == 'WARNING' and warning_template:
+            elif section == 'WARNING':
                 return warning_template.render(context)
             return ''
 
