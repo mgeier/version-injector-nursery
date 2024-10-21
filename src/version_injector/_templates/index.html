@@ -1,9 +1,9 @@
-{%- if default %}
+{% if default -%}
 <!DOCTYPE html>
 <head>
   <meta http-equiv="Refresh" content="0; url={{ pathname_prefix }}/{{ default }}" />
 </head>
-{%- elif not (vanguard + versions + variants) %}
+{%- elif not (vanguard + versions + variants) -%}
 <!DOCTYPE html>
 <head>
   <title>Nothing to see here</title>
