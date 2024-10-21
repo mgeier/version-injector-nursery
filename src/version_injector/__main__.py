@@ -91,19 +91,14 @@ if default:
     if default not in listed_versions:
         parser.exit(f'unlisted default version: {default!r}')
 
-_index = environment.get_template('index.html', globals=version_names).render(
-    default=default, pathname_prefix=args.pathname_prefix)
-if _index.strip():
-    (args.docs_path / 'index.html').write_text(_index)
-else:
-    (args.docs_path / 'index.html').unlink(missing_ok=True)
-
-_404 = environment.get_template('404.html', globals=version_names).render(
-    default=default, pathname_prefix=args.pathname_prefix)
-if _404.strip():
-    (args.docs_path / '404.html').write_text(_404)
-else:
-    (args.docs_path / '404.html').unlink(missing_ok=True)
+for _name in 'index.html', '404.html':
+    _rendered = environment.get_template(_name, globals=version_names).render(
+        default=default, pathname_prefix=args.pathname_prefix)
+    _path = args.docs_path / _name
+    if _rendered.strip():
+        _path.write_text(_rendered)
+    else:
+        _path.unlink(missing_ok=True)
 
 version_list_template = environment.get_template(
     'version-list.html', globals=version_names)
