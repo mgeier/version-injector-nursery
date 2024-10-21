@@ -57,26 +57,33 @@ if args.version not in all_versions:
 
 # TODO: delete subdirectories that are not in all_versions
 
-_loaders = []
-_templates_path = config.get('templates-path')
-# TODO: make sure it's relative to the TOML location
-if _templates_path:
-    if not Path(_templates_path).exists():
-        parser.exit(f'"templates-path" not found: {_templates_path!r}')
-    _loaders.append(
-        jinja2.FileSystemLoader(_templates_path, followlinks=True))
-_loaders.append(jinja2.PackageLoader('version_injector', '_templates'))
-environment = jinja2.Environment(
-    loader=jinja2.ChoiceLoader(_loaders),
-    keep_trailing_newline=True,
-)
-
 version_names = { c: config.get(c, []) for c in CATEGORIES }
 listed_versions = [
     v for c in CATEGORIES if c != 'unlisted' for v in version_names[c]]
 
+
+def get_environment():
+    loaders = []
+    templates_path = config.get('templates-path')
+    # TODO: make sure it's relative to the TOML location
+    if templates_path:
+        if not Path(templates_path).exists():
+            parser.exit(f'"templates-path" not found: {templates_path!r}')
+        loaders.append(
+            jinja2.FileSystemLoader(templates_path, followlinks=True))
+    loaders.append(jinja2.PackageLoader('version_injector', '_templates'))
+    return jinja2.Environment(
+        loader=jinja2.ChoiceLoader(loaders),
+        keep_trailing_newline=True,
+    )
+
+
+def get_template(name, *, environment=get_environment()):
+    return environment.get_template(name, globals=version_names)
+
+
 warning_templates = {
-    c: environment.get_template(c + '-warning.html', globals=version_names)
+    c: get_template(c + '-warning.html')
     for c in CATEGORIES
 }
 
@@ -85,14 +92,14 @@ default = config.get('default', (
     config.get('vanguard') or
     config.get('variants') or [None])[0])
 if default:
-    default_path = args.docs_path / default
-    if not default_path.exists():
-        parser.exit(f'default directory not found: {default_path}')
+    _default_path = args.docs_path / default
+    if not _default_path.exists():
+        parser.exit(f'default directory not found: {_default_path}')
     if default not in listed_versions:
         parser.exit(f'unlisted default version: {default!r}')
 
 for _name in 'index.html', '404.html':
-    _rendered = environment.get_template(_name, globals=version_names).render(
+    _rendered = get_template(_name).render(
         default=default, pathname_prefix=args.pathname_prefix)
     _path = args.docs_path / _name
     if _rendered.strip():
@@ -100,8 +107,7 @@ for _name in 'index.html', '404.html':
     else:
         _path.unlink(missing_ok=True)
 
-version_list_template = environment.get_template(
-    'version-list.html', globals=version_names)
+version_list_template = get_template('version-list.html')
 
 cache = {}
 
