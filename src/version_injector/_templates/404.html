@@ -3,7 +3,7 @@
   <title>Error 404 (Resource not found)</title>
   <script>
     window.onload = () => {
-      document.getElementById("requested").innerHTML = window.location.href;
+      document.getElementById("requested").textContent = window.location.href;
 {%- set listed = vanguard + versions + variants %}
 {%- if default or listed %}
       let pathname = window.location.pathname;
