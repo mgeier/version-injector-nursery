@@ -91,7 +91,7 @@ if default:
     if default not in listed_versions:
         parser.exit(f'unlisted default version: {default!r}')
 
-_index = environment.get_template('index.html').render(
+_index = environment.get_template('index.html', globals=version_names).render(
     default=default, pathname_prefix=args.pathname_prefix)
 if _index.strip():
     (args.docs_path / 'index.html').write_text(_index)
