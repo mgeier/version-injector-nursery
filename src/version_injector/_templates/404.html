@@ -14,16 +14,16 @@
 {%- if default %}
       if (false) {}
 {%- for v in vanguard %}
-      else if (pathname.startsWith("/{{ v }}")) {}
+      else if (pathname.startsWith("/{{ v }}/")) {}
 {%- endfor %}
 {%- for v in versions %}
-      else if (pathname.startsWith("/{{ v }}")) {}
+      else if (pathname.startsWith("/{{ v }}/")) {}
 {%- endfor %}
 {%- for v in variants %}
-      else if (pathname.startsWith("/{{ v }}")) {}
+      else if (pathname.startsWith("/{{ v }}/")) {}
 {%- endfor %}
 {%- for v in unlisted %}
-      else if (pathname.startsWith("/{{ v }}")) {}
+      else if (pathname.startsWith("/{{ v }}/")) {}
 {%- endfor %}
       else {
         const redirecting = '{{ pathname_prefix }}/{{ default }}' + pathname;
@@ -37,5 +37,7 @@
 </head>
 <h1>Error 404</h1>
 <p>The requested resource <code id="requested"></code> was not found.</p>
+{%- if default %}
 <p>Maybe try the <a href="{{ pathname_prefix }}/">main page</a>?</p>
+{%- endif %}
 {#- TODO: dynamically create links to all other versions using that path? #}
