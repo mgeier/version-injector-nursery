@@ -3,7 +3,9 @@
   <title>Error 404 (Resource not found)</title>
   <script>
     window.onload = () => {
-      document.getElementById("requested").innerHTML = window.location.href;
+      document.getElementById("requested").textContent = window.location.href;
+{%- set listed = vanguard + versions + variants %}
+{%- if default or listed %}
       let pathname = window.location.pathname;
 {%- if pathname_prefix %}
       if (!pathname.startsWith("{{ pathname_prefix }}/")) {
@@ -11,25 +13,31 @@
       }
       pathname = pathname.slice({{ pathname_prefix|length }});
 {%- endif %}
-{%- if default %}
-      if (false) {}
-{%- for v in vanguard %}
-      else if (pathname.startsWith("/{{ v }}")) {}
-{%- endfor %}
-{%- for v in versions %}
-      else if (pathname.startsWith("/{{ v }}")) {}
-{%- endfor %}
-{%- for v in variants %}
-      else if (pathname.startsWith("/{{ v }}")) {}
+      let pathname_suffix = "";
+      let alternative_versions = [];
+{%- for v in listed %}
+      if (pathname.startsWith("/{{ v }}/")) { pathname_suffix = pathname.slice({{ 1 + v|length }}); } else { alternative_versions.push("{{ v }}"); }
 {%- endfor %}
 {%- for v in unlisted %}
-      else if (pathname.startsWith("/{{ v }}")) {}
+      if (pathname.startsWith("/{{ v }}/")) { pathname_suffix = pathname.slice({{ 1 + v|length }}); }
 {%- endfor %}
-      else {
-        const redirecting = '{{ pathname_prefix }}/{{ default }}' + pathname;
-        let body = document.querySelector("body");
-        body.innerHTML = "Redirecting to <code>" + redirecting + "</code>";
+{%- if default %}
+      if (pathname_suffix === "") {
+        const redirecting = "{{ pathname_prefix }}/{{ default }}" + pathname;
+        document.body.innerHTML = "Redirecting to <code>" + redirecting + "</code>";
         window.location.pathname = redirecting;
+        return;
+      }
+{%- endif %}
+      if (alternative_versions.length) {
+        document.body.appendChild(document.createElement("p")).textContent = "You might find the requested resource in a different version:";
+        let ul = document.body.appendChild(document.createElement("ul"));
+        for (const v of alternative_versions) {
+          let a = document.createElement("a");
+          a.href = "{{ pathname_prefix }}/" + v + pathname_suffix;
+          a.textContent = v + pathname_suffix;
+          ul.appendChild(document.createElement("li")).appendChild(a);
+        }
       }
 {%- endif %}
     }
@@ -37,5 +45,6 @@
 </head>
 <h1>Error 404</h1>
 <p>The requested resource <code id="requested"></code> was not found.</p>
+{%- if default %}
 <p>Maybe try the <a href="{{ pathname_prefix }}/">main page</a>?</p>
-{#- TODO: dynamically create links to all other versions using that path? #}
+{%- endif %}

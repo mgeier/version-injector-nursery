@@ -90,20 +90,23 @@ if default:
         parser.exit(f'default directory not found: {default_path}')
     if default not in listed_versions:
         parser.exit(f'unlisted default version: {default!r}')
-    (args.docs_path / 'index.html').write_text(
-        environment.get_template('index.html').render(
-            default=default, pathname_prefix=args.pathname_prefix))
+
+_index = environment.get_template('index.html').render(
+    default=default, pathname_prefix=args.pathname_prefix)
+if _index.strip():
+    (args.docs_path / 'index.html').write_text(_index)
 else:
-    # TODO: create index page with listed_versions (if empty: ?)
     (args.docs_path / 'index.html').unlink(missing_ok=True)
 
-(args.docs_path / '404.html').write_text(
-    environment.get_template('404.html', globals=version_names).render(
-        default=default, pathname_prefix=args.pathname_prefix))
+_404 = environment.get_template('404.html', globals=version_names).render(
+    default=default, pathname_prefix=args.pathname_prefix)
+if _404.strip():
+    (args.docs_path / '404.html').write_text(_404)
+else:
+    (args.docs_path / '404.html').unlink(missing_ok=True)
 
 version_list_template = environment.get_template(
     'version-list.html', globals=version_names)
-
 
 cache = {}
 
