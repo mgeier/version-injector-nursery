@@ -4,7 +4,7 @@
   <script>
     window.onload = () => {
       document.getElementById("requested").textContent = window.location.href;
-{%- set listed = vanguard + versions + variants %}
+{%- set listed = vanguard + versions + variants|sort %}
 {%- if default or listed %}
       let pathname = window.location.pathname;
 {%- if pathname_prefix %}
