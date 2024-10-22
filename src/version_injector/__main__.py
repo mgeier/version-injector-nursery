@@ -1,5 +1,6 @@
 """Inject version information into HTML files."""
 import argparse
+import functools
 from pathlib import Path
 
 import jinja2
@@ -109,26 +110,21 @@ for _name in 'index.html', '404.html':
 
 version_list_template = get_template('version-list.html')
 
-cache = {}
 
-
-def create_context(current, relative_path):
+@functools.cache
+def links(relative_path):
     # Find links from the current version of the current HTML file
     # to the same file (or some parent directory) in all listed versions.
-    links = cache.setdefault(relative_path, {})
-    for v in listed_versions:
-        if v not in links:
-            new_path = args.docs_path / v / relative_path
-            while not new_path.exists():
-                new_path = new_path.parent
-            links[v] = '/'.join([
-                args.pathname_prefix,
-                new_path.relative_to(args.docs_path).as_posix()])
-    return {
-        'current': current,
-        'default': default,
-        'links': links,
-    }
+
+    def find_existing_path(v):
+        new_path = args.docs_path / v / relative_path
+        while not new_path.exists():
+            new_path = new_path.parent
+        return '/'.join([
+            args.pathname_prefix,
+            new_path.relative_to(args.docs_path).as_posix()])
+
+    return {v: find_existing_path(v) for v in listed_versions}
 
 
 def inject_file(path, injection):
@@ -172,7 +168,11 @@ def inject_directory(current):
         assert False
     current_path = args.docs_path / current
     for path in current_path.rglob('*.html'):
-        context = create_context(current, path.relative_to(current_path))
+        context = {
+            'current': current,
+            'default': default,
+            'links': links(path.relative_to(current_path)),
+        }
 
         def injection(section):
             if section == 'VERSIONS':
