@@ -85,11 +85,6 @@ def get_template(name, *, environment=get_environment()):
     return environment.get_template(name, globals=version_names)
 
 
-warning_templates = {
-    c: get_template(c + '-warning.html')
-    for c in CATEGORIES
-}
-
 default = config.get('default', (
     config.get('versions') or
     config.get('vanguard') or
@@ -109,8 +104,6 @@ for _name in 'index.html', '404.html':
         _path.write_text(_rendered)
     else:
         _path.unlink(missing_ok=True)
-
-version_list_template = get_template('version-list.html')
 
 
 @functools.cache
@@ -162,9 +155,10 @@ def inject_file(path, injection):
 def inject_directory(current):
     # TODO: proper logging
     print('injecting into', current)
+    version_list_template = get_template('version-list.html')
     for c in CATEGORIES:
         if current in version_names[c]:
-            warning_template = warning_templates[c]
+            warning_template = get_template(c + '-warning.html')
             break
     else:
         assert False
