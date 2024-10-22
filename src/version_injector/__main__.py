@@ -75,6 +75,8 @@ def get_environment():
     loaders.append(jinja2.PackageLoader('version_injector', '_templates'))
     return jinja2.Environment(
         loader=jinja2.ChoiceLoader(loaders),
+        trim_blocks=True,
+        lstrip_blocks=True,
         keep_trailing_newline=True,
     )
 

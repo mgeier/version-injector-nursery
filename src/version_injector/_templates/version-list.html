@@ -1,9 +1,9 @@
-{%- for v in vanguard %}
+{% for v in vanguard %}
 <li><a class="reference internal{% if v == current %} current-page{% endif %}" href="{{ links[v] }}">{{ v }}</a></li>
-{%- endfor %}
-{%- for v in versions %}
+{% endfor %}
+{% for v in versions %}
 <li><a class="reference internal{% if v == current %} current-page{% endif %}" href="{{ links[v] }}">{{ v }}</a></li>
-{%- endfor %}
-{%- for v in variants|sort %}
+{% endfor %}
+{% for v in variants|sort %}
 <li><a class="reference internal{% if v == current %} current-page{% endif %}" href="{{ links[v] }}">{{ v }}</a></li>
-{%- endfor %}
+{% endfor %}

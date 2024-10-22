@@ -1,15 +1,15 @@
-{% if default -%}
+{% if default %}
 <!DOCTYPE html>
 <head>
   <meta http-equiv="Refresh" content="0; url={{ pathname_prefix }}/{{ default }}" />
 </head>
-{%- elif not (vanguard + versions + variants) -%}
+{% elif not (vanguard + versions + variants) %}
 <!DOCTYPE html>
 <head>
   <title>Nothing to see here</title>
 </head>
 <h1>Move along!</h1>
 <p>Nothing to see here.</p>
-{%- else %}
-{#- Don't create index.html; instead use 404.html to show available versions. #}
-{%- endif %}
+{% else %}
+{# Don't create index.html; instead use 404.html to show available versions. #}
+{% endif %}

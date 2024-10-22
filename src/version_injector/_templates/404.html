@@ -4,31 +4,31 @@
   <script>
     window.onload = () => {
       document.getElementById("requested").textContent = window.location.href;
-{%- set listed = vanguard + versions + variants|sort %}
-{%- if default or listed %}
+{% set listed = vanguard + versions + variants|sort %}
+{% if default or listed %}
       let pathname = window.location.pathname;
-{%- if pathname_prefix %}
+{% if pathname_prefix %}
       if (!pathname.startsWith("{{ pathname_prefix }}/")) {
         throw new Error("This 404 page should only be used within '{{ pathname_prefix }}/'");
       }
       pathname = pathname.slice({{ pathname_prefix|length }});
-{%- endif %}
+{% endif %}
       let pathname_suffix = "";
       let alternative_versions = [];
-{%- for v in listed %}
+{% for v in listed %}
       if (pathname.startsWith("/{{ v }}/")) { pathname_suffix = pathname.slice({{ 1 + v|length }}); } else { alternative_versions.push("{{ v }}"); }
-{%- endfor %}
-{%- for v in unlisted %}
+{% endfor %}
+{% for v in unlisted %}
       if (pathname.startsWith("/{{ v }}/")) { pathname_suffix = pathname.slice({{ 1 + v|length }}); }
-{%- endfor %}
-{%- if default %}
+{% endfor %}
+{% if default %}
       if (pathname_suffix === "") {
         const redirecting = "{{ pathname_prefix }}/{{ default }}" + pathname;
         document.body.innerHTML = "Redirecting to <code>" + redirecting + "</code>";
         window.location.pathname = redirecting;
         return;
       }
-{%- endif %}
+{% endif %}
       if (alternative_versions.length) {
         document.body.appendChild(document.createElement("p")).textContent = "You might find the requested resource in a different version:";
         let ul = document.body.appendChild(document.createElement("ul"));
@@ -39,12 +39,12 @@
           ul.appendChild(document.createElement("li")).appendChild(a);
         }
       }
-{%- endif %}
+{% endif %}
     }
   </script>
 </head>
 <h1>Error 404</h1>
 <p>The requested resource <code id="requested"></code> was not found.</p>
-{%- if default %}
+{% if default %}
 <p>Maybe try the <a href="{{ pathname_prefix }}/">main page</a>?</p>
-{%- endif %}
+{% endif %}
