@@ -1,0 +1,3 @@
+{% if default and links[current].split('/') | last == links[default].split('/') | last %}
+    <link rel="canonical" href="https://mgeier.github.io{{ links[default] }}" />
+{% endif %}

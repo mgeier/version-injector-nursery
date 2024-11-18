@@ -1,0 +1,10 @@
+{% extends "!layout.html" %}
+
+
+{% block extrahead %}
+{{- super() }}
+{%- if not pageurl %}
+<!--inject-CANONICAL-below-->
+<!--inject-CANONICAL-above-->
+{%- endif %}
+{%- endblock %}

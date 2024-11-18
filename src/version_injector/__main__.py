@@ -156,6 +156,7 @@ def inject_directory(current):
     # TODO: proper logging
     print('injecting into', current)
     version_list_template = get_template('version-list.html')
+    canonical_link_template = get_template('canonical-link.html')
     for c in CATEGORIES:
         if current in version_names[c]:
             warning_template = get_template(c + '-warning.html')
@@ -175,6 +176,8 @@ def inject_directory(current):
                 return version_list_template.render(context)
             elif section == 'WARNING':
                 return warning_template.render(context)
+            elif section == 'CANONICAL':
+                return canonical_link_template.render(context)
             return ''
 
         inject_file(path, injection)
