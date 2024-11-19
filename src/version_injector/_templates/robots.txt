@@ -1,0 +1,6 @@
+{% if unlisted and not pathname_prefix %}
+User-agent: *
+{% for v in unlisted %}
+Disallow: /{{ v }}/
+{% endfor %}
+{% endif %}

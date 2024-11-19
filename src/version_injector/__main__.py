@@ -96,7 +96,7 @@ if default:
     if default not in listed_versions:
         parser.exit(f'unlisted default version: {default!r}')
 
-for _name in 'index.html', '404.html':
+for _name in 'index.html', '404.html', 'robots.txt':
     _rendered = get_template(_name).render(
         default=default, pathname_prefix=args.pathname_prefix)
     _path = args.docs_path / _name
