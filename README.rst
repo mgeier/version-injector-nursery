@@ -38,3 +38,9 @@ Non-Sphinx projects with versioning:
 https://docusaurus.io/docs/versioning
 
 https://github.com/jimporter/mike (for MkDocs)
+
+Blog post that shows how to create multi-version Sphinx docs with GitHub Pages:
+https://www.codingwiththomas.com/blog/my-sphinx-best-practice-for-a-multiversion-documentation-in-different-languages
+
+Another tutorial:
+https://olgarithms.github.io/sphinx-tutorial/docs/9-versioning.html
