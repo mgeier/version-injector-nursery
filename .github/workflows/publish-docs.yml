@@ -16,6 +16,7 @@ on:
 env:
   PAGES_STORAGE_REPO: mgeier/version-injector-nursery-pages
   DOCS: docs
+  CANONICAL_URL: https://mgeier.github.io
   # Here you can map branch/tag names to displayed version names.
   # We want to use "latest" for the main branch:
   VERSION: ${{ github.ref_name == github.event.repository.default_branch && 'latest' || github.ref_name }}
@@ -80,6 +81,7 @@ jobs:
           ${{ github.ref_type == 'tag' && 'versions' || 'variants' }}
           --docs-path $DOCS
           --pathname-prefix ${{ steps.configure-pages.outputs.base_path }}
+          --canonical $CANONICAL_URL
       - name: Set Git user/email
         run: |
           git config --global user.name 'github-actions[bot]'
