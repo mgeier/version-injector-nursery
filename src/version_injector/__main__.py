@@ -27,6 +27,9 @@ parser.add_argument(
 parser.add_argument(
     '--pathname-prefix', default='', type=str,
     help="beginning of the 'pathname' component of the final URL")
+parser.add_argument(
+    '--canonical', type=str,
+    help="canonical URL (without pathname, without trailing slash)")
 args = parser.parse_args()
 
 config_file = TOMLFile('version-injector.toml')
@@ -169,6 +172,7 @@ def inject_directory(current):
             'current': current,
             'default': default,
             'links': links(path.relative_to(current_path)),
+            'canonical': args.canonical,
         }
 
         def injection(section):
