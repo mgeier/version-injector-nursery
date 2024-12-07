@@ -123,6 +123,12 @@ jobs:
       id-token: write
     runs-on: ubuntu-latest
     needs: assemble-pages
+    # Using an "environment" is optional, but using it nicely integrates
+    # our deployments in the GitHub project site.
+    # Don't forget to create an environment with the same name in the GitHub settings!
+    environment: 
+      name: website
+      url: https://mgeier.github.io/version-injector-nursery/${{ env.VERSION }}/
     # NB: We want to allow skipping the "build" step in manual builds.
     if: ${{ !failure() && !cancelled() && needs.check-token.outputs.available == 'true' }}
     steps:
