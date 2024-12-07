@@ -15,6 +15,12 @@ env:
 jobs:
   deploy-pr-preview:
     runs-on: ubuntu-latest
+    # Using an "environment" is optional, but using it nicely integrates
+    # our deployments in the GitHub project site.
+    # Don't forget to create an environment with the same name in the GitHub settings!
+    environment: 
+      name: pr-preview
+      url: https://mgeier.github.io/version-injector-nursery-pull-request-previews/${{ env.PR_NUMBER }}/
     if: >
       github.event.workflow_run.event == 'pull_request' &&
       github.event.workflow_run.conclusion == 'success'
