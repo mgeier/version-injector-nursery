@@ -34,7 +34,7 @@ jobs:
         run: |
           test -n "$PR_NUMBER" || false
       - name: Check out storage repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: ${{ env.PAGES_STORAGE_REPO }}
           token: ${{ secrets.PAGES_STORAGE_TOKEN }}
