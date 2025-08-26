@@ -113,7 +113,7 @@ jobs:
           fi
       # Don't forget to activate "pages" in your project settings!
       - name: Upload pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: ${{ env.DOCS }}
 
