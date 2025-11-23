@@ -62,7 +62,7 @@ jobs:
           rm -rf $DOCS/$VERSION
       - name: Download built docs
         if: ${{ ! inputs.only-inject }} 
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: docs
           path: ${{ env.DOCS }}/${{ env.VERSION }}
