@@ -41,7 +41,7 @@ jobs:
         # TODO: add version to file name?
         run: mv latex/version-injector.pdf html/
       - name: Upload built docs
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: docs
           path: _build/html
