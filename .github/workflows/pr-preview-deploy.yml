@@ -87,7 +87,7 @@ jobs:
             false
           fi
       - name: Create PR comment
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@v3
         with:
           number: ${{ env.PR_NUMBER }}
           message: |
