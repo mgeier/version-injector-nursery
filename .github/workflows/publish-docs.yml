@@ -49,13 +49,13 @@ jobs:
     if: ${{ !failure() && !cancelled() && needs.check-token.outputs.available == 'true' }}
     steps:
       - name: Check out pages storage repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: ${{ env.PAGES_STORAGE_REPO }}
           token: ${{ secrets.PAGES_STORAGE_TOKEN }}
       - name: Setup Github Pages
         id: configure-pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
       - name: Remove target directory
         if: ${{ ! inputs.only-inject }} 
         run: |
@@ -113,7 +113,7 @@ jobs:
           fi
       # Don't forget to activate "pages" in your project settings!
       - name: Upload pages artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: ${{ env.DOCS }}
 
@@ -134,4 +134,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
