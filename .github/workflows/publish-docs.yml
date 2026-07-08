@@ -55,7 +55,7 @@ jobs:
           token: ${{ secrets.PAGES_STORAGE_TOKEN }}
       - name: Setup Github Pages
         id: configure-pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
       - name: Remove target directory
         if: ${{ ! inputs.only-inject }} 
         run: |
