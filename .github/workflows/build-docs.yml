@@ -32,7 +32,7 @@ jobs:
       - name: LaTeX -> PDF
         uses: xu-cheng/latex-action@v4
         with:
-          working-directory: _build/latex
+          working_directory: _build/latex
           root_file: version-injector.tex
       - name: Move PDF to HTML directory
         working-directory: _build
