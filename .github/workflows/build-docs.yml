@@ -32,7 +32,7 @@ jobs:
       - name: Setup tectonic
         uses: wtfjoke/setup-tectonic@v4
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          tectonic-version: continuous
       - name: Run tectonic
         working-directory: _build/latex
         run: tectonic version-injector.tex
